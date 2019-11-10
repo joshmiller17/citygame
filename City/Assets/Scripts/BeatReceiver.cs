@@ -16,7 +16,7 @@ public class BeatReceiver : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Spawner.Beats.Count - 1 > 0) {
+        if (Spawner.Beats.Count - 1 > 0 && Spawner.IsActive) {
             if (Input.GetMouseButtonDown(0))
             {
                 BeatController LastBeat = Spawner.Beats[0].GetComponent<BeatController>();

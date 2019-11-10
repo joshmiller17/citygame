@@ -8,6 +8,8 @@ public class BeatController : MonoBehaviour
     public BeatSpawner ParentSpawner;
     public int PerfectNote = 200;
     public int NoteDeviation = 50;
+    private bool IsActive = true;
+    private bool IsReal = true;
 
     // Start is called before the first frame update
     void Start()
@@ -30,5 +32,18 @@ public class BeatController : MonoBehaviour
         ParentSpawner.Beats.Remove(gameObject);
         //Debug.Log("Beat faded!");
         Destroy(gameObject);
+    }
+
+    public void Toggle()
+    {
+        IsActive = !IsActive;
+        if (IsActive)
+        {
+            IsReal = false; //when resuming play, pseudo-delete the existing beats to give the player time to get up to speed
+        }
+        else
+        {
+            transform.localScale = new Vector3(0, 0, 0);
+        }
     }
 }
