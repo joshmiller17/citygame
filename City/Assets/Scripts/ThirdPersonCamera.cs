@@ -4,86 +4,97 @@ using UnityEngine;
 
 public class ThirdPersonCamera : MonoBehaviour
 {
-    public float speed = 1;
-    public GameObject Player;
-    public GameObject CamPivot;
-    public float rotSpeed = 100;
+    public Transform target;
+    public Transform pivot;
+    public Vector3 offset;
+    public bool useOffsetValues;
+    public float rotateSpeed;
+    public bool YaxisInvert;
 
-    private Vector3 offset;
-    private float rotDirection = 0;
-    private float vertRotDir = 0;
-    private int rotLimit = 20;
     private int minDist = 4;
     private int maxDist = 30;
 
 
     void Start()
     {
-        CamPivot.transform.parent = Player.transform;
-        offset = transform.position - CamPivot.transform.position;
+
+        if (!useOffsetValues)
+        {
+            offset = target.position - transform.position;
+        }
+
+        pivot.transform.position = target.transform.position;
+        pivot.transform.parent = null;
         // to zoom out, multiply; to zoom in, divide
 
         //Cursor.lockState = CursorLockMode.Locked; //hide cursor; TODO fix for things like menus
-
     }
 
     void Update()
     {
+        
     }
 
     void LateUpdate()
     {
         HandleCameraZoom();
         HandleCameraPivot();
-        CamPivot.transform.position = Player.transform.position;
+        pivot.transform.position = target.transform.position;
     }
 
     void HandleCameraZoom()
     {
         if (Input.mouseScrollDelta.y != 0.0f)
         {
-            if (Input.mouseScrollDelta.y > 0 && Vector3.Distance(transform.position, Player.transform.position) > minDist)
+            if (Input.mouseScrollDelta.y > 0 && Vector3.Distance(transform.position, target.transform.position) > minDist)
             {
-                ChangeZoom();
+                ChangeZoom(Input.mouseScrollDelta.y);
             }
-            else if (Input.mouseScrollDelta.y < 0 && Vector3.Distance(transform.position, Player.transform.position) < maxDist)
+            else if (Input.mouseScrollDelta.y < 0 && Vector3.Distance(transform.position, target.transform.position) < maxDist)
             {
-                ChangeZoom();
+                ChangeZoom(Input.mouseScrollDelta.y);
             }
         }
     }
 
     void HandleCameraPivot()
     {
-        if (Input.GetMouseButton(1))
-        { // right click
-            rotDirection += Input.GetAxis("Mouse X") * Time.deltaTime * rotSpeed;
-            //rotDirection = BindToRotLimit(rotDirection); //Don't limit x rotation
-            vertRotDir += Input.GetAxis("Mouse Y") * Time.deltaTime * rotSpeed;
-            vertRotDir = BindToRotLimit(vertRotDir);
+        if (Input.GetMouseButton(1)) // right click
+        {
+            float horizontal = Input.GetAxis("Mouse X") * rotateSpeed * Time.deltaTime;
+            pivot.Rotate(0, horizontal, 0);
 
-            CamPivot.transform.rotation = Quaternion.Euler(-1 * vertRotDir, rotDirection, 0);
+            int invert = YaxisInvert ? -1 : 1;
+            float vert = invert * Input.GetAxis("Mouse Y") * rotateSpeed * Time.deltaTime;
+            if ((pivot.rotation.x < 0.4f && vert > 0) || (pivot.rotation.x > -0.4f && vert < 0)) //max/min view angle
+            {
+                pivot.Rotate(vert, 0, 0);
+            }
+
+            //Cursor.lockState = CursorLockMode.Locked; //TODO, replace cursor to sprite so it can be hidden smartly later
         }
+        else
+        {
+            //Cursor.lockState = CursorLockMode.None;
+        }
+
+        float Yangle = pivot.eulerAngles.y;
+        float Xangle = pivot.eulerAngles.x;
+        Quaternion rot = Quaternion.Euler(Xangle, Yangle, 0);
+        transform.position = target.position - (rot * offset);
+
+        if (transform.position.y < target.position.y)
+        {
+            transform.position = new Vector3(transform.position.x, target.position.y - 0.5f, transform.position.z);
+        }
+
+        transform.LookAt(target);
+
     }
 
-    float BindToRotLimit(float rotDir) {
-        if (rotDir > rotLimit)
-        {
-            rotDir = rotLimit;
-        }
-        if (rotDir < -1 * rotLimit)
-        {
-            rotDir = -1 * rotLimit;
-        }
-        return rotDir;
-    }
-
-    void ChangeZoom()
+    void ChangeZoom(float amount)
     {
-        offset = transform.position - CamPivot.transform.position;
-        offset *= (10 - Input.mouseScrollDelta.y) / 10;
-        transform.position = CamPivot.transform.position + offset;
-
+        offset *= (10 - amount) / 10;
     }
 
 }
