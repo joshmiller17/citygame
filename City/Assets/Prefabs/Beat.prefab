@@ -36,7 +36,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 10, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1097983032588082028
 CanvasRenderer:
@@ -86,7 +86,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 565cd9618918fd34db53042c8e5265bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 150
-  ParentSpawner: {fileID: 0}
-  PerfectNote: 250
-  NoteDeviation: 30
+  Parent: {fileID: 0}
+  invertDirection: 0

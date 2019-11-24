@@ -1,10 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
-    public GameObject BeatSpawner;
+    public static PlayerController instance;
+
+    public Text DebugInfo;
     public GameObject Camera;
     public GameObject MusicSystem;
     public CharacterController controller;
@@ -13,13 +16,17 @@ public class PlayerController : MonoBehaviour
 
     //TODO link to character model
 
-    public float SongFadeTime = 0.5f;
-    public float CoyoteTime = 0.3f;
+    public float SongFadeTime;
+    public float CoyoteTime;
     public float jumpForce;
     public float jumpDuration;
 
     public float moveSpeed;
     public float gravityScale;
+    public float maxSpeedMultiplier;
+
+    private float jumpAmountLeft;
+    private float speedMultiplier;
 
     private Vector3 moveDirection = new Vector3(0,0,0);
     private float TimeSinceLastGround = 0;
@@ -28,9 +35,14 @@ public class PlayerController : MonoBehaviour
     private AudioSource aud;
     private bool MusicOn = true;
 
+    private Vector3 lastPosition;
+
     // Start is called before the first frame update
     void Start()
     {
+        instance = this;
+        speedMultiplier = 1;
+
         controller = GetComponent<CharacterController>();
         aud = MusicSystem.GetComponent<AudioSource>();
     }
@@ -38,17 +50,30 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+      if (Input.GetKeyDown("c")) //debug cheat
+        {
+            speedMultiplier = maxSpeedMultiplier;
+        }
+
       if (Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift)){
-            BeatSpawner.GetComponent<BeatSpawner>().Toggle();
+            BeatSpawner.instance.Toggle();
             MusicOn = !MusicOn;
         }
       FadeSong(MusicOn);
 
+        lastPosition = transform.position;
         Move();
     }
 
     void LateUpdate()
     {
+        DebugInfo.text = "Speed multiplier: " + speedMultiplier.ToString();
+        DebugInfo.text += "\nCurrent speed: " + (Vector3.Distance(transform.position, lastPosition)).ToString();
+    }
+
+    bool IsMovingFast()
+    {
+        return (Vector3.Distance(transform.position, lastPosition)) > 0.1f;
     }
 
     void Move()
@@ -58,7 +83,7 @@ public class PlayerController : MonoBehaviour
         float yStore = moveDirection.y;
 
         moveDirection = (transform.forward * v) + (transform.right * h);
-        moveDirection = moveDirection.normalized * moveSpeed;
+        moveDirection = moveDirection.normalized * moveSpeed * speedMultiplier;
         moveDirection.y = yStore;
 
         if (controller.isGrounded)
@@ -69,21 +94,26 @@ public class PlayerController : MonoBehaviour
         else
         {
             TimeSinceLastGround += Time.deltaTime;
+            jumpAmountLeft = Mathf.Max(jumpAmountLeft - Time.deltaTime, 0);
         }
 
 
         if (TimeSinceLastGround < CoyoteTime && Input.GetButton("Jump"))
         {
+            if (!isJumping)
+            {
+                jumpAmountLeft = jumpDuration + ((speedMultiplier - 1) * 0.1f);
+            }
             isJumping = true;
         }
-        if (Input.GetButtonUp("Jump") || TimeSinceLastGround > CoyoteTime)
+        if (Input.GetButtonUp("Jump") || jumpAmountLeft <= 0)
         {
             isJumping = false;
         }
 
         if (isJumping)
         {
-            moveDirection.y = jumpForce;
+            moveDirection.y = jumpForce + Mathf.Pow(speedMultiplier, 1.01f);
         }
         else
         {
@@ -101,6 +131,11 @@ public class PlayerController : MonoBehaviour
             //transform.rotation = Quaternion.Slerp(transform.rotation, newRotation, rotateSpeed * Time.deltaTime); //TODO rotate the player model, not the transform
         }
 
+        if (!IsMovingFast() || !MusicOn) //slow down if we're not moving and listening to music
+        {
+            speedMultiplier = Mathf.Max(speedMultiplier * 0.999f, 1);
+        }
+
     }
 
     void FadeSong(bool MusicOn)
@@ -113,5 +148,25 @@ public class PlayerController : MonoBehaviour
         {
             aud.volume -= Time.deltaTime / SongFadeTime;
         }
+    }
+
+    public void ExcellentBeat()
+    {
+        speedMultiplier = Mathf.Min(speedMultiplier * 1.02f, maxSpeedMultiplier);
+    }
+
+    public void GoodBeat()
+    {
+        speedMultiplier = Mathf.Min(speedMultiplier * 1.007f, maxSpeedMultiplier);
+    }
+
+    public void OKBeat()
+    {
+        speedMultiplier = Mathf.Min(speedMultiplier * 1.002f, maxSpeedMultiplier);
+    }
+
+    public void MissBeat()
+    {
+        speedMultiplier = Mathf.Max(speedMultiplier * 0.75f, 1);
     }
 }

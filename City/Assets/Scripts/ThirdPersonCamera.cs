@@ -66,16 +66,16 @@ public class ThirdPersonCamera : MonoBehaviour
 
             int invert = YaxisInvert ? -1 : 1;
             float vert = invert * Input.GetAxis("Mouse Y") * rotateSpeed * Time.deltaTime;
-            if ((pivot.rotation.x < 0.4f && vert > 0) || (pivot.rotation.x > -0.4f && vert < 0)) //max/min view angle
+            if ((pivot.rotation.x < 0.3f && vert > 0) || (pivot.rotation.x > -0.3f && vert < 0)) //max/min view angle
             {
                 pivot.Rotate(vert, 0, 0);
             }
 
-            //Cursor.lockState = CursorLockMode.Locked; //TODO, replace cursor to sprite so it can be hidden smartly later
+            Cursor.lockState = CursorLockMode.Locked; //TODO, replace cursor to sprite so it can be hidden smartly later
         }
         else
         {
-            //Cursor.lockState = CursorLockMode.None;
+            Cursor.lockState = CursorLockMode.None;
         }
 
         float Yangle = pivot.eulerAngles.y;
@@ -92,7 +92,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
     }
 
-    void ChangeZoom(float amount)
+    public void ChangeZoom(float amount)
     {
         offset *= (10 - amount) / 10;
     }
