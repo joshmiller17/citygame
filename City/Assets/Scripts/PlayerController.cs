@@ -24,6 +24,7 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed;
     public float gravityScale;
     public float maxSpeedMultiplier;
+    public float maxTalkingRange;
 
     private float jumpAmountLeft;
     private float speedMultiplier;
@@ -50,7 +51,17 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-      if (Input.GetKeyDown("c")) //debug cheat
+        if (Input.GetKeyDown("z")) //Player tries to talk
+        {
+            GameObject Talker = GetNearestNPCWithinRange(maxTalkingRange);
+            if (Talker != null)
+            {
+                string name = Talker.GetComponent<NPC>().GetName();
+                string speech = Talker.GetComponent<NPC>().GetSpeech();
+                Dialogue.instance.newDialogue(name, speech);
+            }
+        }
+        if (Input.GetKeyDown("c")) //debug cheat
         {
             speedMultiplier = maxSpeedMultiplier;
         }
@@ -69,6 +80,27 @@ public class PlayerController : MonoBehaviour
     {
         DebugInfo.text = "Speed multiplier: " + speedMultiplier.ToString();
         DebugInfo.text += "\nCurrent speed: " + (Vector3.Distance(transform.position, lastPosition)).ToString();
+    }
+
+    GameObject GetNearestNPCWithinRange(float maxRangeAllowed)
+    {
+        GameObject[] npcs;
+        npcs = GameObject.FindGameObjectsWithTag("NPC");
+        GameObject closest = null;
+        float distance = Mathf.Infinity;
+        Vector3 position = transform.position;
+        foreach (GameObject npc in npcs)
+        {
+            Vector3 diff = npc.transform.position - position;
+            float curDistance = diff.sqrMagnitude;
+           // Debug.Log("Distance to NPC is " + curDistance);
+            if (curDistance < distance && curDistance < maxRangeAllowed)
+            {
+                closest = npc;
+                distance = curDistance;
+            }
+        }
+        return closest;
     }
 
     bool IsMovingFast()
