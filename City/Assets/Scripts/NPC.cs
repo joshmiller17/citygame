@@ -6,6 +6,7 @@ public class NPC : MonoBehaviour
 {
     public string speech;
     public string characterName;
+    public bool talksFirst;
 
     // Start is called before the first frame update
     void Start()

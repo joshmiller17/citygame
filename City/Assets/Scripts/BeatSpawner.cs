@@ -10,6 +10,8 @@ public class BeatSpawner : MonoBehaviour
     public AudioSource Hit;
     public GameObject BeatPrefab;
     public GameObject FeedbackPrefab;
+    public GameObject Background;
+    public GameObject Target;
     public List<GameObject> Beats;
 
     public bool IsActive = true;
@@ -68,6 +70,8 @@ public class BeatSpawner : MonoBehaviour
         {
             beat.GetComponent<BeatController>().Toggle();
         }
+        Background.SetActive(IsActive);
+        Target.SetActive(IsActive);
     }
 
     public void MissBeat()

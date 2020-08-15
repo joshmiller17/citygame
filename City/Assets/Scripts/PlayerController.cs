@@ -12,7 +12,18 @@ public class PlayerController : MonoBehaviour
     public GameObject MusicSystem;
     public CharacterController controller;
     public Transform pivot;
+    public GameObject dialogueBox;
+    public GameObject talkerBox;
+    public GameObject speechBox;
+    public GameObject thoughtBox;
+    public GameObject thoughtText;
+    public GameObject moneyText;
+    public GameObject interactionInfo;
     public float rotateSpeed;
+    public int money = 0;
+    public float energy = 100f;
+    public float health = 100f;
+    public float energyLostPerSecond = 0.1f;
 
     //TODO link to character model
 
@@ -35,6 +46,10 @@ public class PlayerController : MonoBehaviour
     private int jumpBuffer = 0; //TODO add a jump buffer for inputting jump before hitting ground
     private AudioSource aud;
     private bool MusicOn = true;
+    private GameObject whosTalking = null;
+    private float thoughtTimer = 0;
+    private bool needToWork = true;
+    private Shop availableShop = null;
 
     private Vector3 lastPosition;
 
@@ -46,21 +61,48 @@ public class PlayerController : MonoBehaviour
 
         controller = GetComponent<CharacterController>();
         aud = MusicSystem.GetComponent<AudioSource>();
+
+        haveThought("I should go to work");
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown("z")) //Player tries to talk
+        if (thoughtTimer <= 0)
         {
-            GameObject Talker = GetNearestNPCWithinRange(maxTalkingRange);
-            if (Talker != null)
-            {
-                string name = Talker.GetComponent<NPC>().GetName();
-                string speech = Talker.GetComponent<NPC>().GetSpeech();
-                Dialogue.instance.newDialogue(name, speech);
-            }
+            thoughtBox.SetActive(false);
         }
+        else
+        {
+            thoughtTimer -= Time.deltaTime;
+        }
+
+        moneyText.GetComponent<Text>().text = string.Format("Money: ${0}\nEnergy: {1}\nHealth: {2}\nTo Do: {3}", money, energy.ToString("F1"), health.ToString("F1"), needToWork ? "work" : "sleep");
+        energy -= Time.deltaTime * energyLostPerSecond;
+        if (energy < 0)
+        {
+            //take negative energy as damage and speed penalty
+            health += energy;
+            energy = 0;
+            speedMultiplier *= 0.998f; //can go below 1?
+        }
+
+        GameObject Talker = GetNearestNPCWithinRange(maxTalkingRange);
+        if (Talker != null && (Input.GetKeyDown("z") || Talker.GetComponent<NPC>().talksFirst))
+        {
+            whosTalking = Talker;
+            talkerBox.GetComponent<Text>().text = Talker.GetComponent<NPC>().GetName();
+            speechBox.GetComponent<Text>().text = Talker.GetComponent<NPC>().GetSpeech();
+            dialogueBox.SetActive(true);
+            //Dialogue.instance.newDialogue(name, speech);
+
+        }
+        else if (Talker != whosTalking)
+        {
+            dialogueBox.SetActive(false);
+        }
+
+
         if (Input.GetKeyDown("c")) //debug cheat
         {
             speedMultiplier = maxSpeedMultiplier;
@@ -72,8 +114,71 @@ public class PlayerController : MonoBehaviour
         }
       FadeSong(MusicOn);
 
+        if (Input.GetKeyDown("e") && availableShop != null)
+        {
+            availableShop.Show();
+            return; //don't move
+        }
+
         lastPosition = transform.position;
         Move();
+    }
+
+
+    void OnTriggerEnter(Collider collider)
+    {
+        Debug.Log(collider);
+        if (collider.gameObject.name == "WorkTrigger")
+        {
+            if (needToWork)
+            {
+                needToWork = false;
+                money += 50;
+                haveThought("I should sleep");
+            }
+            else
+            {
+                haveThought("I already worked today, I should sleep");
+            }
+        }
+
+        if (collider.gameObject.name == "HomeTrigger")
+        {
+            if (!needToWork)
+            {
+                needToWork = true;
+                energy = 100;
+                haveThought("I should work");
+            }
+            else
+            {
+                haveThought("I already slept today, I should work");
+            }
+        }
+
+        if (collider.gameObject.name == "ShopTrigger")
+        {
+            availableShop = collider.gameObject.GetComponentInParent<Shop>();
+            interactionInfo.GetComponent<Text>().text = "Press E to Shop";
+            interactionInfo.SetActive(true);
+        }
+
+    }
+
+    void OnTriggerExit(Collider collider)
+    {
+        if (collider.gameObject.name == "ShopTrigger")
+        {
+            availableShop = null;
+            interactionInfo.SetActive(false);
+        }
+    }
+
+        void haveThought(string thought, float lifespan = 3f)
+    {
+        thoughtText.GetComponent<Text>().text = thought;
+        thoughtBox.SetActive(true);
+        thoughtTimer = lifespan;
     }
 
     void LateUpdate()
