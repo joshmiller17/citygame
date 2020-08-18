@@ -15,7 +15,8 @@ public class BeatSpawner : MonoBehaviour
     public List<GameObject> Beats;
 
     public bool IsActive = true;
-    public float BeatInterval;
+    public float[] BeatRhythm;
+    public int CurrentBeatIndex = 0;
     public float BeatSpeed; //min 1 (slowest)
     public float ScreenPercentForPerfect;
     public float ScreenPercentForGood;
@@ -28,7 +29,7 @@ public class BeatSpawner : MonoBehaviour
     {
         instance = this;
 
-        ToNextBeat = BeatInterval;
+        ToNextBeat = BeatRhythm[CurrentBeatIndex];
         transform.position = new Vector3(Screen.width / 2, Screen.height * 0.1f, 0);
 
         ScreenPercentForPerfect *= Screen.width; //fixme if screen width changes, need to update these numbers
@@ -47,7 +48,12 @@ public class BeatSpawner : MonoBehaviour
         if (ToNextBeat < 0)
         {
             SpawnBeat();
-            ToNextBeat = BeatInterval;
+            CurrentBeatIndex += 1;
+            if (CurrentBeatIndex > BeatRhythm.Length)
+            {
+                CurrentBeatIndex = 0;
+            }
+            ToNextBeat = BeatRhythm[CurrentBeatIndex];
         }
     }
 

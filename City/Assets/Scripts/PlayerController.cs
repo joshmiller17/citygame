@@ -7,6 +7,11 @@ public class PlayerController : MonoBehaviour
 {
     public static PlayerController instance;
 
+    private static float EXCELLENT_BEAT_MULTIPLIER = 1.06f;
+    private static float GOOD_BEAT_MULTIPLIER = 1.03f;
+    private static float OK_BEAT_MULTIPLIER = 1.01f;
+    private static float MISS_BEAT_MULTIPLIER = 0.8f;
+
     public Text DebugInfo;
     public GameObject Camera;
     public GameObject MusicSystem;
@@ -20,10 +25,15 @@ public class PlayerController : MonoBehaviour
     public GameObject moneyText;
     public GameObject interactionInfo;
     public float rotateSpeed;
-    public int money = 0;
-    public float energy = 100f;
-    public float health = 100f;
-    public float energyLostPerSecond = 0.1f;
+    public float workPerSecond;
+    public float money;
+    public float energy;
+    public float health;
+    public float food;
+    public float energyLostPerSecond;
+    public float foodLostPerEnergy;
+
+    private const int BAR_MAX = 100;
 
     //TODO link to character model
 
@@ -37,6 +47,12 @@ public class PlayerController : MonoBehaviour
     public float maxSpeedMultiplier;
     public float maxTalkingRange;
 
+    public int todaysDate = 0;
+    public float timeOfDay;
+    public int secondsInDay; //0 = early morning, i.e. 6am
+
+    private const float NIGHT_RATIO = 0.75f;
+
     private float jumpAmountLeft;
     private float speedMultiplier;
 
@@ -44,11 +60,15 @@ public class PlayerController : MonoBehaviour
     private float TimeSinceLastGround = 0;
     private bool isJumping = false;
     private int jumpBuffer = 0; //TODO add a jump buffer for inputting jump before hitting ground
+
     private AudioSource aud;
     private bool MusicOn = true;
+
     private GameObject whosTalking = null;
     private float thoughtTimer = 0;
+    private bool hungry = false;
     private bool needToWork = true;
+    private bool working = false;
     private Shop availableShop = null;
 
     private Vector3 lastPosition;
@@ -65,8 +85,22 @@ public class PlayerController : MonoBehaviour
         haveThought("I should go to work");
     }
 
-    // Update is called once per frame
-    void Update()
+    bool isNight()
+    {
+        return timeOfDay >= secondsInDay * NIGHT_RATIO;
+    }
+
+    void updateTimeOfDay()
+    {
+        timeOfDay += Time.deltaTime;
+        if (timeOfDay > secondsInDay)
+        {
+            timeOfDay -= secondsInDay;
+            todaysDate += 1;
+        }
+    }
+
+    void updateThoughtTimer()
     {
         if (thoughtTimer <= 0)
         {
@@ -76,52 +110,155 @@ public class PlayerController : MonoBehaviour
         {
             thoughtTimer -= Time.deltaTime;
         }
+    }
 
-        moneyText.GetComponent<Text>().text = string.Format("Money: ${0}\nEnergy: {1}\nHealth: {2}\nTo Do: {3}", money, energy.ToString("F1"), health.ToString("F1"), needToWork ? "work" : "sleep");
-        energy -= Time.deltaTime * energyLostPerSecond;
-        if (energy < 0)
+    void updateWorking()
+    {
+        if (working)
         {
-            //take negative energy as damage and speed penalty
+            if (health <= BAR_MAX / 2 || isNight())
+            {
+                stopWorking();
+            }
+            else
+            {
+                float workDone = Time.deltaTime * workPerSecond;
+                spendEnergy(workDone);
+                money += workDone;
+            }
+        }
+    }
+
+    bool isHungry()
+    {
+        return food <= 0;
+    }
+
+    bool isTired()
+    {
+        return energy <= 0;
+    }
+
+    void spendEnergy(float amount)
+    {
+        energy -= amount;
+        food -= amount * foodLostPerEnergy;
+        if (isTired())
+        {
             health += energy;
             energy = 0;
             speedMultiplier *= 0.998f; //can go below 1?
         }
+        if (isHungry())
+        {
+            health += food;
+            food = 0;
+            speedMultiplier *= 0.998f; //can go below 1?
 
+            if (!hungry)
+            {
+                haveThought("I'm hungry. I should eat something.");
+                hungry = true;
+            }
+        }
+        else
+        {
+            hungry = false;
+        }
+    }
+
+    void updateInfoDisplay()
+    {
+        moneyText.GetComponent<Text>().text = string.Format("Money: ${0}\nEnergy: {1}\nHealth: {2}{3}\nTo Do: {4}\nDay {5} Time {6}",
+            money.ToString("F2"), energy.ToString("F1"), health.ToString("F1"), 
+            isHungry() ? " (hungry)" : "", needToWork ? "work" : "sleep", todaysDate.ToString(), timeOfDay.ToString("F1"));
+    }
+
+    void updateSpeech()
+    {
         GameObject Talker = GetNearestNPCWithinRange(maxTalkingRange);
-        if (Talker != null && (Input.GetKeyDown("z") || Talker.GetComponent<NPC>().talksFirst))
+        if (Talker != null && availableShop == null /*don't talk near shops*/
+            && (Input.GetKeyDown("e") || Talker.GetComponent<NPC>().talksFirst))
         {
             whosTalking = Talker;
             talkerBox.GetComponent<Text>().text = Talker.GetComponent<NPC>().GetName();
             speechBox.GetComponent<Text>().text = Talker.GetComponent<NPC>().GetSpeech();
             dialogueBox.SetActive(true);
-            //Dialogue.instance.newDialogue(name, speech);
-
         }
         else if (Talker != whosTalking)
         {
             dialogueBox.SetActive(false);
         }
+    }
 
-
+    void checkInputs()
+    {
         if (Input.GetKeyDown("c")) //debug cheat
         {
             speedMultiplier = maxSpeedMultiplier;
         }
 
-      if (Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift)){
-            BeatSpawner.instance.Toggle();
-            MusicOn = !MusicOn;
+        if (Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift))
+        {
+            ToggleMusic();
         }
-      FadeSong(MusicOn);
 
         if (Input.GetKeyDown("e") && availableShop != null)
         {
-            availableShop.Show();
-            return; //don't move
+            availableShop.Show(todaysDate);
+            if (MusicOn)
+            {
+                ToggleMusic();
+            }
         }
+    }
+
+    void ToggleMusic()
+    {
+        BeatSpawner.instance.Toggle();
+        MusicOn = !MusicOn;
+    }
+
+    void limitBarMax()
+    {
+        if (energy > BAR_MAX)
+        {
+            energy = BAR_MAX;
+        }
+        if (health > BAR_MAX)
+        {
+            health = BAR_MAX;
+        }
+        if (food > BAR_MAX)
+        {
+            food = BAR_MAX;
+        }
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        updateTimeOfDay();
+        updateThoughtTimer();
+        updateWorking();
+        updateInfoDisplay();
+        updateSpeech();
+        limitBarMax();
+
+        spendEnergy(Time.deltaTime * energyLostPerSecond);
+
+        checkInputs();
+
+        FadeSong(MusicOn);
 
         lastPosition = transform.position;
         Move();
+    }
+
+    void stopWorking()
+    {
+        haveThought("I should sleep");
+        working = false;
     }
 
 
@@ -132,9 +269,9 @@ public class PlayerController : MonoBehaviour
         {
             if (needToWork)
             {
+                working = true;
                 needToWork = false;
                 money += 50;
-                haveThought("I should sleep");
             }
             else
             {
@@ -147,7 +284,7 @@ public class PlayerController : MonoBehaviour
             if (!needToWork)
             {
                 needToWork = true;
-                energy = 100;
+                energy = BAR_MAX;
                 haveThought("I should work");
             }
             else
@@ -172,9 +309,17 @@ public class PlayerController : MonoBehaviour
             availableShop = null;
             interactionInfo.SetActive(false);
         }
+
+        if (collider.gameObject.name == "WorkTrigger")
+        {
+            if (working)
+            {
+                stopWorking();
+            }
+        }
     }
 
-        void haveThought(string thought, float lifespan = 3f)
+    public void haveThought(string thought, float lifespan = 3f)
     {
         thoughtText.GetComponent<Text>().text = thought;
         thoughtBox.SetActive(true);
@@ -289,21 +434,22 @@ public class PlayerController : MonoBehaviour
 
     public void ExcellentBeat()
     {
-        speedMultiplier = Mathf.Min(speedMultiplier * 1.02f, maxSpeedMultiplier);
+        speedMultiplier = Mathf.Max(speedMultiplier + .01f, Mathf.Min(speedMultiplier * EXCELLENT_BEAT_MULTIPLIER, maxSpeedMultiplier));
     }
 
     public void GoodBeat()
     {
-        speedMultiplier = Mathf.Min(speedMultiplier * 1.007f, maxSpeedMultiplier);
+        speedMultiplier = Mathf.Max(speedMultiplier + .001f, Mathf.Min(speedMultiplier * GOOD_BEAT_MULTIPLIER, maxSpeedMultiplier));
     }
 
     public void OKBeat()
     {
-        speedMultiplier = Mathf.Min(speedMultiplier * 1.002f, maxSpeedMultiplier);
+        speedMultiplier = Mathf.Max(speedMultiplier + .0001f, Mathf.Min(speedMultiplier * OK_BEAT_MULTIPLIER, maxSpeedMultiplier));
     }
 
     public void MissBeat()
     {
-        speedMultiplier = Mathf.Max(speedMultiplier * 0.75f, 1);
+        speedMultiplier = Mathf.Min(speedMultiplier, Mathf.Max(speedMultiplier * MISS_BEAT_MULTIPLIER, 1));
     }
+
 }
