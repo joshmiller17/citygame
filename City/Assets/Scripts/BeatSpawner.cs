@@ -49,7 +49,7 @@ public class BeatSpawner : MonoBehaviour
         {
             SpawnBeat();
             CurrentBeatIndex += 1;
-            if (CurrentBeatIndex > BeatRhythm.Length)
+            if (CurrentBeatIndex >= BeatRhythm.Length)
             {
                 CurrentBeatIndex = 0;
             }

@@ -6,7 +6,6 @@ public class BeatController : MonoBehaviour
 {
     public bool IsMirror = false;
     private bool IsActive = true;
-    private bool IsReal = true;
 
     private GameObject Mirror;
 
@@ -62,11 +61,7 @@ public class BeatController : MonoBehaviour
     public void Toggle()
     {
         IsActive = !IsActive;
-        if (IsActive)
-        {
-            IsReal = false; //when resuming play, pseudo-delete the existing beats to give the player time to get up to speed
-        }
-        else
+        if (!IsActive)
         {
             transform.localScale = new Vector3(0, 0, 0);
         }

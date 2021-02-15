@@ -59,7 +59,7 @@ public class PlayerController : MonoBehaviour
     private Vector3 moveDirection = new Vector3(0,0,0);
     private float TimeSinceLastGround = 0;
     private bool isJumping = false;
-    private int jumpBuffer = 0; //TODO add a jump buffer for inputting jump before hitting ground
+    //private int jumpBuffer = 0; //TODO add a jump buffer for inputting jump before hitting ground
 
     private AudioSource aud;
     private bool MusicOn = true;
@@ -396,6 +396,7 @@ public class PlayerController : MonoBehaviour
         if (isJumping)
         {
             moveDirection.y = jumpForce + Mathf.Pow(speedMultiplier, 1.01f);
+            //gameObject.transform.Find("R_arm").gameObject //TODO
         }
         else
         {
