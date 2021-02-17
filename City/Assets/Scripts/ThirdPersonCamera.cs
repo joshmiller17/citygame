@@ -66,10 +66,12 @@ public class ThirdPersonCamera : MonoBehaviour
 
             int invert = YaxisInvert ? -1 : 1;
             float vert = invert * Input.GetAxis("Mouse Y") * rotateSpeed * Time.deltaTime;
-            if ((pivot.rotation.x < 0.3f && vert > 0) || (pivot.rotation.x > -0.3f && vert < 0)) //max/min view angle
-            {
-                pivot.Rotate(vert, 0, 0);
-            }
+
+            // this code is no longer relevant because of how billboarding is happening
+            //if ((pivot.rotation.x < 0.3f && vert > 0) || (pivot.rotation.x > -0.3f && vert < 0)) //max/min view angle
+            //{
+            //    pivot.Rotate(vert, 0, 0);
+            //}
 
             Cursor.lockState = CursorLockMode.Locked; //TODO, replace cursor to sprite so it can be hidden smartly later
         }

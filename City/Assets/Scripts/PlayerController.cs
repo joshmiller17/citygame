@@ -7,13 +7,13 @@ public class PlayerController : MonoBehaviour
 {
     public static PlayerController instance;
 
-    private static float EXCELLENT_BEAT_MULTIPLIER = 1.06f;
-    private static float GOOD_BEAT_MULTIPLIER = 1.03f;
-    private static float OK_BEAT_MULTIPLIER = 1.01f;
-    private static float MISS_BEAT_MULTIPLIER = 0.8f;
+    public static float EXCELLENT_BEAT_MULTIPLIER = 1.06f;
+    public static float GOOD_BEAT_MULTIPLIER = 1.03f;
+    public static float OK_BEAT_MULTIPLIER = 1.01f;
+    public static float MISS_BEAT_MULTIPLIER = 0.8f;
 
     public Text DebugInfo;
-    public GameObject Camera;
+    public GameObject TPCamera;
     public GameObject MusicSystem;
     public CharacterController controller;
     public Transform pivot;
@@ -41,6 +41,8 @@ public class PlayerController : MonoBehaviour
     public float CoyoteTime;
     public float jumpForce;
     public float jumpDuration;
+
+    public bool YaxisInvert;
 
     public float moveSpeed;
     public float gravityScale;
@@ -238,12 +240,14 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
         updateTimeOfDay();
         updateThoughtTimer();
         updateWorking();
         updateInfoDisplay();
         updateSpeech();
         limitBarMax();
+        HandleCameraPivot();
 
         spendEnergy(Time.deltaTime * energyLostPerSecond);
 
@@ -253,6 +257,21 @@ public class PlayerController : MonoBehaviour
 
         lastPosition = transform.position;
         Move();
+    }
+
+    void HandleCameraPivot()
+    {
+        if (Input.GetMouseButton(1)) // right click
+        {
+            float horizontal = Input.GetAxis("Mouse X") * rotateSpeed * Time.deltaTime;
+            //float vertical = Input.GetAxis("Mouse Y") * rotateSpeed * Time.deltaTime;
+            transform.Rotate(0, horizontal, 0, Space.Self);
+            Cursor.lockState = CursorLockMode.Locked; //TODO, replace cursor to sprite so it can be hidden smartly later
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.None;
+        }
     }
 
     void stopWorking()

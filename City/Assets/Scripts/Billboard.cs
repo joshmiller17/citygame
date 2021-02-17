@@ -8,5 +8,12 @@ public class Billboard : MonoBehaviour
     {
         transform.LookAt(transform.position + Camera.main.transform.rotation * Vector3.forward,
              Camera.main.transform.rotation * Vector3.up);
+
+        // only horizontal move
+        //transform.LookAt(transform.position + Camera.main.transform.rotation * Vector3.forward,
+        //      Camera.main.transform.rotation * Vector3.up);
+        //Vector3 eulerAngles = transform.eulerAngles;
+        //eulerAngles.x = 0;
+        //transform.eulerAngles = eulerAngles;
     }
 }
