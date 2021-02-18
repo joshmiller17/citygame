@@ -57,6 +57,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 7594423797060492282}
     m_Modifications:
+    - target: {fileID: 469129017568109921, guid: fca536249adcf0a4a9eb9c7da429069f,
+        type: 3}
+      propertyPath: m_Name
+      value: ShopTrigger
+      objectReference: {fileID: 0}
     - target: {fileID: 2442147530883302069, guid: fca536249adcf0a4a9eb9c7da429069f,
         type: 3}
       propertyPath: m_Sprite
