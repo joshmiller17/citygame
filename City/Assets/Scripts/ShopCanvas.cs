@@ -34,7 +34,7 @@ public class ShopCanvas : MonoBehaviour
         string boxName = "ItemPanel/ItemBox" + index.ToString();
         GameObject itemBox = transform.Find(boxName).gameObject;
         itemBox.transform.Find("Image").gameObject.GetComponent<RawImage>().texture = Resources.Load<Texture2D>("Art/Items/"+item.icon);
-        itemBox.transform.Find("ItemDesc").gameObject.GetComponent<Text>().text = item.description + "  Costs " + item.cost.ToString();
+        itemBox.transform.Find("ItemDesc").gameObject.GetComponent<Text>().text = item.description + "\nCosts $" + item.cost.ToString("F2");
         itemBox.transform.Find("ItemName").gameObject.GetComponent<Text>().text = item.itemName;
         
         if (item.purchased)

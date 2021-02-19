@@ -14,36 +14,31 @@ public class Shop : MonoBehaviour
     public string storeName = "Test Store";
     public ShopType shopType;
 
-    
     private float itemRandomness; // in percentage of potential variance, rolled once per item
     private int dateRestocked = 0;
 
     // Start is called before the first frame update
     void Start()
     {
+        daysUntilClose = Random.Range(1, 9);
+
         //test numbers set
-        priceModifier = 1.2f;
-        valueModifier = 1.1f;
-        shopRandomness = 0.2f;
-        shopType = ShopType.Food;
+        priceModifier = Random.Range(0.5f, 2.0f);
+        valueModifier = Random.Range(0.5f, 2.0f);
+        shopRandomness = Random.Range(0.1f, 2.0f);
+        shopType = (ShopType)Random.Range(3, 4); // TODO add more range as I write and test shops
 
         //actual rolling
         itemRandomness = Random.Range(-1f * shopRandomness, shopRandomness);
         shopRandomness = Random.Range(-1f * shopRandomness, shopRandomness);
 
         Debug.Log(string.Format(
-            "Made {6} shop \"{4}\" closing in {5} with these modifiers: price {0}\nvalue {1}\nshop {2}\nitem {3}\n", 
+            "Made {6} shop \"{4}\" closing in {5} with these modifiers: price {0}, value {1}, shop {2}, item {3}", 
             priceModifier.ToString("F2"), valueModifier.ToString("F2"), 
             shopRandomness.ToString("F2"), itemRandomness.ToString("F2"), storeName, 
             daysUntilClose.ToString(), shopType.ToString()));
 
         ResetInventory();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     FoodItem GenerateFoodItem(FoodItem.FoodType type, float itemRand)
@@ -52,6 +47,7 @@ public class Shop : MonoBehaviour
         f = FoodItem.BaseItem(type);
         f.value *= valueModifier * itemRand;
         f.cost *= priceModifier * itemRand;
+        f.cost = Mathf.Round(f.cost * 100f) / 100f; //Round to 2 places
         bool negFlip = Random.value < .5;
         f.food *= f.food < 0 && negFlip ? itemRand : 1.0f / itemRand;
         f.health *= f.health < 0 && negFlip ? itemRand : 1.0f / itemRand;
@@ -92,12 +88,48 @@ public class Shop : MonoBehaviour
         return f;
     }
 
+    CoffeeItem GenerateCoffeeItem(CoffeeItem.CoffeeType type, float itemRand)
+    {
+        CoffeeItem c = new CoffeeItem();
+        c = CoffeeItem.BaseItem(type);
+        c.value *= valueModifier * itemRand;
+        c.cost *= priceModifier * itemRand;
+        c.cost = Mathf.Round(c.cost * 100f) / 100f; //Round to 2 places
+        bool negFlip = Random.value < .5;
+        c.boost *= c.boost < 0 && negFlip ? itemRand : 1.0f / itemRand;
+        c.boostDuration *= c.boostDuration < 0 && negFlip ? itemRand : 1.0f / itemRand;
+        c.jumpMultiplier *= c.jumpMultiplier < 0 && negFlip ? itemRand : 1.0f / itemRand;
+
+        switch (type)
+        {
+            case CoffeeItem.CoffeeType.Coffee:
+                c.icon = "coffee";
+                c.itemName = "Coffee";
+                c.description = "A classic coffee.";
+                break;
+
+            case CoffeeItem.CoffeeType.LongCoffee:
+                c.icon = "longcoffee";
+                c.itemName = "Long Coffee";
+                c.description = "For a long-lasting boost.";
+                break;
+
+            case CoffeeItem.CoffeeType.JumpCoffee:
+                c.icon = "jumpcoffee";
+                c.itemName = "Jump Coffee";
+                c.description = "Hop higher with this coffee with a kick!";
+                break;
+        }
+        return c;
+    }
+
     void ResetInventory()
     {
         for (int i = 0; i < inventory.Length; i++)
         {
             float itemRand = 1 + Random.Range(-1f * itemRandomness, itemRandomness) * shopRandomness;
             FoodItem.FoodType foodType;
+            CoffeeItem.CoffeeType coffeeType;
             switch (shopType)
             {
                 case ShopType.Food:
@@ -112,11 +144,13 @@ public class Shop : MonoBehaviour
                     foodType = FoodItem.FoodType.EnergyDrink;
                     inventory[i] = GenerateFoodItem(foodType, itemRand);
                     break;
-
-
-
                 case ShopType.Coffee:
-                    //TODO
+                    coffeeType = Random.value < .4 ? CoffeeItem.CoffeeType.Coffee : CoffeeItem.CoffeeType.LongCoffee;
+                    if (coffeeType == CoffeeItem.CoffeeType.LongCoffee)
+                    {
+                        coffeeType = Random.value < .5 ? CoffeeItem.CoffeeType.JumpCoffee : CoffeeItem.CoffeeType.LongCoffee;
+                    }
+                    inventory[i] = GenerateCoffeeItem(coffeeType, itemRand);
                     break;
                 case ShopType.Travel:
                     //TODO
@@ -144,6 +178,7 @@ public class Shop : MonoBehaviour
     {
         if (day != dateRestocked)
         {
+            Debug.Log("Restocking");
             ResetInventory();
             dateRestocked = day;
         }
@@ -154,6 +189,12 @@ public class Shop : MonoBehaviour
         }
         ShopCanvas.instance.SetShop(this);
         ShopCanvas.instance.gameObject.SetActive(true);
-    }
 
+        // familiarity
+        EnvObj envObj = gameObject.GetComponentInParent<EnvObj>();
+        if (envObj != null)
+        {
+            envObj.Interact();
+        }
+    }
 }

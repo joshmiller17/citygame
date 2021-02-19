@@ -7,8 +7,9 @@ public class EnvObj : MonoBehaviour
 {
     public Familiarity fam = new Familiarity();
 
-    private void OnTriggerEnter(Collider other)
+    public void Interact()
     {
-        Debug.Log("Triggered");
+        fam.Interact();
+        Debug.Log(string.Format("EnvObj familiarity is now {0}", fam.GetFamiliarity()));
     }
 }

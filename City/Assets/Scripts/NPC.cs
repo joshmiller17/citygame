@@ -7,17 +7,7 @@ public class NPC : MonoBehaviour
     public string speech;
     public string characterName;
     public bool talksFirst;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-    }
+    public Familiarity fam = new Familiarity();
 
     public string GetSpeech()
     {
@@ -27,5 +17,10 @@ public class NPC : MonoBehaviour
     public string GetName()
     {
         return characterName;
+    }
+
+    public void Interact()
+    {
+        fam.Interact();
     }
 }

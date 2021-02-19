@@ -12,6 +12,8 @@ public class PlayerController : MonoBehaviour
     public static float OK_BEAT_MULTIPLIER = 1.01f;
     public static float MISS_BEAT_MULTIPLIER = 0.8f;
 
+    public Material BlendedSkybox;
+    public Material[] Skyboxes;
     public Text DebugInfo;
     public GameObject TPCamera;
     public GameObject MusicSystem;
@@ -100,6 +102,10 @@ public class PlayerController : MonoBehaviour
             timeOfDay -= secondsInDay;
             todaysDate += 1;
         }
+
+        float distanceFromNoon = Mathf.Abs(timeOfDay - (secondsInDay / 2));
+        BlendedSkybox.SetFloat("_Blend", (1 - (distanceFromNoon / (secondsInDay/2))));
+        //RenderSettings.skybox = Skyboxes[(int)Mathf.Floor((timeOfDay / secondsInDay) * Skyboxes.Length)];
     }
 
     void updateThoughtTimer()
@@ -127,6 +133,7 @@ public class PlayerController : MonoBehaviour
                 float workDone = Time.deltaTime * workPerSecond;
                 spendEnergy(workDone);
                 money += workDone;
+                timeOfDay += workDone;
             }
         }
     }
@@ -186,6 +193,7 @@ public class PlayerController : MonoBehaviour
             talkerBox.GetComponent<Text>().text = Talker.GetComponent<NPC>().GetName();
             speechBox.GetComponent<Text>().text = Talker.GetComponent<NPC>().GetSpeech();
             dialogueBox.SetActive(true);
+            Talker.GetComponent<NPC>().Interact();
         }
         else if (Talker != whosTalking)
         {
@@ -284,6 +292,16 @@ public class PlayerController : MonoBehaviour
     void OnTriggerEnter(Collider collider)
     {
         Debug.Log(collider);
+        if (collider.gameObject.name == "Trigger")
+        {
+            // EnvObj
+            EnvObj envObj = collider.gameObject.GetComponentInParent<EnvObj>();
+            if (envObj != null)
+            {
+                envObj.Interact();
+            }
+
+        }
         if (collider.gameObject.name == "WorkTrigger")
         {
             if (needToWork)
@@ -302,13 +320,23 @@ public class PlayerController : MonoBehaviour
         {
             if (!needToWork)
             {
-                needToWork = true;
-                energy = BAR_MAX;
-                haveThought("I should work");
+                if (timeOfDay > secondsInDay / 2)
+                {
+                    needToWork = true;
+                    float sleep_amount = ((secondsInDay - timeOfDay) / secondsInDay) * 2 * BAR_MAX;
+                    Debug.Log("Slept for " + sleep_amount.ToString("F1"));
+                    energy = Mathf.Min(BAR_MAX, energy + sleep_amount);
+                    timeOfDay = secondsInDay - 1;
+                    haveThought("I should work");
+                }
+                else
+                {
+                    haveThought("It's too early to sleep");
+                }
             }
             else
             {
-                haveThought("I already slept today, I should work");
+                haveThought("I haven't gone to work yet");
             }
         }
 
@@ -349,8 +377,10 @@ public class PlayerController : MonoBehaviour
     {
         DebugInfo.text = "Speed multiplier: " + speedMultiplier.ToString();
         DebugInfo.text += "\nCurrent speed: " + (Vector3.Distance(transform.position, lastPosition)).ToString();
+        DebugInfo.text += "\nTime of Day: " + ((timeOfDay / secondsInDay) * 24).ToString("F2");
     }
 
+    //FIXME probably switch this to the normal way triggers happen, code is probably lighter that way when there's many NPCs
     GameObject GetNearestNPCWithinRange(float maxRangeAllowed)
     {
         GameObject[] npcs;

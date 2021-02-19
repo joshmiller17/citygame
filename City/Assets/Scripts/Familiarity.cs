@@ -5,16 +5,15 @@ using UnityEngine;
 //state of familiarity
 public class Familiarity
 {
-    public int lastDateOfInteraction = -1;
-    public float familiarity = 0;
-
+    private int lastDateOfInteraction = -1;
+    private float familiarity = 0;
     private int lastDateUpdated = 0;
     private int minimumFamiliarity = 0;
 
     void UpdateFamiliarity()
     {
         int daysMissed = PlayerController.instance.todaysDate - lastDateOfInteraction;
-        familiarity = Mathf.Min(minimumFamiliarity, familiarity - daysMissed * 0.25f);
+        familiarity = Mathf.Max(minimumFamiliarity, familiarity - daysMissed * 0.25f);
         lastDateUpdated = PlayerController.instance.todaysDate;
     }
 
@@ -41,7 +40,7 @@ public class Familiarity
 
     public void Interact()
     {
-        if (lastDateOfInteraction != PlayerController.instance.todaysDate)
+        if (!InteractedToday())
         {
             familiarity += 1;
             lastDateOfInteraction = PlayerController.instance.todaysDate;
