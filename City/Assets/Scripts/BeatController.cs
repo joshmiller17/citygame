@@ -1,15 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BeatController : MonoBehaviour
 {
     public bool IsMirror = false;
+    public float timeLeft;
+    public int channel = 1;
     private bool IsActive = true;
 
     private GameObject Mirror;
 
-    // Start is called before the first frame update
     void Start()
     {
         if (!IsMirror)
@@ -20,20 +22,32 @@ public class BeatController : MonoBehaviour
         }
     }
 
+    public void SetColor(Color c)
+    {
+        GetComponent<Image>().color = c;
+    }
+
     // Update is called once per frame
     void Update()
     {
+        if (IsActive != BeatSpawner.instance.IsActive)
+        {
+            Toggle();
+        }
+        timeLeft -= Time.deltaTime;
         if (!IsMirror)
         {
-            float moveDistance = 0.1f * Time.deltaTime * BeatSpawner.instance.BeatSpeed * Screen.width;
-            transform.position = new Vector3(transform.position.x + moveDistance, transform.position.y, transform.position.z);
+            float target = BeatSpawner.instance.transform.position.x;
+            float speed = BeatSpawner.instance.CurrentSong.speedDifficulty;
+            float width = BeatSpawner.instance.resolution.width;
+            transform.position = new Vector3(target + -1 * timeLeft * speed * width, BeatSpawner.instance.transform.position.y, 0);
 
-            if (transform.position.x > BeatSpawner.instance.transform.position.x)
+            if (transform.position.x > target)
             {
                 transform.localScale = new Vector3(0, 0, 0); //invisible but still active
             }
 
-            if (transform.position.x > BeatSpawner.instance.transform.position.x + BeatSpawner.instance.ScreenPercentForGood)
+            if (transform.position.x > target + BeatSpawner.instance.ScreenPercentForOK)
             {
                 if (IsActive)
                 {
@@ -43,7 +57,8 @@ public class BeatController : MonoBehaviour
             }
 
             //also move mirror
-            Mirror.transform.position = new Vector3(Screen.width - transform.position.x, transform.position.y, transform.position.z);
+            Mirror.transform.position = new Vector3(target + - 1 * (transform.position.x - target), transform.position.y, transform.position.z);
+            Mirror.GetComponent<Image>().color = GetComponent<Image>().color;
         }
         else
         {
@@ -54,7 +69,6 @@ public class BeatController : MonoBehaviour
     public void DeleteBeat()
     {
         BeatSpawner.instance.Beats.Remove(gameObject);
-        //Debug.Log("Beat faded!");
         Destroy(gameObject);
     }
 
@@ -64,6 +78,13 @@ public class BeatController : MonoBehaviour
         if (!IsActive)
         {
             transform.localScale = new Vector3(0, 0, 0);
+        }
+        else
+        {
+            transform.localScale = new Vector3(1, 1, 1);
+        }
+        if (IsActive && timeLeft < 1) { // give at least one second warning
+            IsActive = false;
         }
     }
 }

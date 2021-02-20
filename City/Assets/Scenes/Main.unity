@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.08446381, g: 0.08808064, b: 0.46508473, a: 1}
+  m_IndirectSpecularColor: {r: 0.5197985, g: 0.53652704, b: 0.7457949, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -525,7 +525,7 @@ Transform:
   - {fileID: 982767526}
   - {fileID: 1602594044}
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &223407349
 GameObject:
@@ -592,7 +592,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &223407353
 MonoBehaviour:
@@ -2032,6 +2032,8 @@ MonoBehaviour:
   todaysDate: 0
   timeOfDay: 0
   secondsInDay: 30
+  jumpAmountLeft: 0
+  speedMultiplier: 1
 --- !u!222 &682783591
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2272,7 +2274,7 @@ Transform:
   - {fileID: 326964297}
   - {fileID: 6410363409199312541}
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &817656478
 GameObject:
@@ -2756,7 +2758,7 @@ RectTransform:
   - {fileID: 1334807716}
   - {fileID: 1313779803}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -3388,7 +3390,7 @@ RectTransform:
   - {fileID: 4658695}
   - {fileID: 275295024}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -4187,7 +4189,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d15e0d786daeca742886dd7f4d65373f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Hit: {fileID: 1313779805}
+  Hit: {fileID: 8300000, guid: 44483dc3ffa194648b5b52ffabfae66b, type: 3}
+  Hit2: {fileID: 8300000, guid: ce30600157120bb4492dc56d7f41f4c3, type: 3}
   BeatPrefab: {fileID: 1097983032588082027, guid: 6b21f3cd5fb36294ca604c1dd2638f9e,
     type: 3}
   FeedbackPrefab: {fileID: 7287929641602658851, guid: c52026f95622b014296f6919afcb4703,
@@ -4196,17 +4199,12 @@ MonoBehaviour:
   Target: {fileID: 817656478}
   Beats: []
   IsActive: 1
-  BeatRhythm:
-  - 1
-  - 1
-  - 0.5
-  - 0.5
-  - 2
-  CurrentBeatIndex: 0
-  BeatSpeed: 2
   ScreenPercentForPerfect: 0.005
+  ScreenPercentForGreat: 0.01
   ScreenPercentForGood: 0.05
-  BeatAdjustment: 4
+  ScreenPercentForOK: 0.1
+  MAX_BEATS: 6
+  BeatOffset: 0
 --- !u!82 &1313779805
 AudioSource:
   m_ObjectHideFlags: 0
@@ -4678,11 +4676,11 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 3d3aac4a764938e4db07b4d4bc4bc2ea, type: 3}
-  m_PlayOnAwake: 1
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 0
   m_Volume: 0.8
   m_Pitch: 1
-  Loop: 1
+  Loop: 0
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
@@ -4776,7 +4774,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1420833915
 MonoBehaviour:
@@ -4791,6 +4789,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   instance: {fileID: 0}
+  SongDir: Audio/Music
+  RhythmDir: Rhythms
   BeatSpawner: {fileID: 1313779802}
 --- !u!1 &1475619570
 GameObject:
@@ -6470,45 +6470,6 @@ Transform:
   m_Father: {fileID: 6410363409199312541}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &3622319262554971190
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8480325279115950271}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: -1444460858095362738, guid: 5939c05df1be47b48b1f1ce364ce3e55, type: 3}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
 --- !u!1 &3923435938445486233
 GameObject:
   m_ObjectHideFlags: 0
@@ -6823,7 +6784,6 @@ GameObject:
   m_Component:
   - component: {fileID: 3534312253414518710}
   - component: {fileID: 6806181242914710156}
-  - component: {fileID: 3622319262554971190}
   - component: {fileID: 7642999910260362906}
   m_Layer: 0
   m_Name: Cube

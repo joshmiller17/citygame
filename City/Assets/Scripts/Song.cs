@@ -4,11 +4,9 @@ using UnityEngine;
 
 public class Song
 {
+    public string name;
     public AudioClip clip;
-    public float[] rhythm;
-
-    public void SetRhythm(float[] r)
-    {
-        rhythm = r;
-    }
+    public Rhythm rhythm;
+    public int beatDifficulty;
+    public float speedDifficulty;
 }

@@ -120,21 +120,21 @@ public class CoffeeItem : Item
         {
             case CoffeeType.Coffee:
                 ret.boost = 1;
-                ret.boostDuration = 100;
+                ret.boostDuration = 60;
                 ret.jumpMultiplier = -0.5f;
                 ret.cost = 10;
                 break;
 
             case CoffeeType.LongCoffee:
                 ret.boost = 0.5f;
-                ret.boostDuration = 300;
+                ret.boostDuration = 120;
                 ret.jumpMultiplier = -0.5f;
                 ret.cost = 20;
                 break;
 
             case CoffeeType.JumpCoffee:
                 ret.boost = 0.1f;
-                ret.boostDuration = 50f;
+                ret.boostDuration = 30;
                 ret.jumpMultiplier = 2.0f;
                 ret.cost = 15;
                 break;
@@ -145,7 +145,9 @@ public class CoffeeItem : Item
 
     public override void Use()
     {
-        //TODO
+        PlayerController.instance.speedBoost = boost;
+        PlayerController.instance.boostDuration = boostDuration;
+        PlayerController.instance.jumpMultiplier = jumpMultiplier;
     }
 }
 

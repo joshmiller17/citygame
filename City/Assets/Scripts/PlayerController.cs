@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     public static PlayerController instance;
 
     public static float EXCELLENT_BEAT_MULTIPLIER = 1.06f;
+    public static float GREAT_BEAT_MULTIPLIER = 1.04f;
     public static float GOOD_BEAT_MULTIPLIER = 1.03f;
     public static float OK_BEAT_MULTIPLIER = 1.01f;
     public static float MISS_BEAT_MULTIPLIER = 0.8f;
@@ -35,7 +36,10 @@ public class PlayerController : MonoBehaviour
     public float energyLostPerSecond;
     public float foodLostPerEnergy;
 
-    private const int BAR_MAX = 100;
+    public const int BAR_MAX = 100;
+
+    public const float NIGHT_RATIO = 0.75f;
+
 
     //TODO link to character model
 
@@ -55,12 +59,15 @@ public class PlayerController : MonoBehaviour
     public float timeOfDay;
     public int secondsInDay; //0 = early morning, i.e. 6am
 
-    private const float NIGHT_RATIO = 0.75f;
 
-    private float jumpAmountLeft;
-    private float speedMultiplier;
+    public float jumpAmountLeft;
+    public float speedMultiplier;
 
-    private Vector3 moveDirection = new Vector3(0,0,0);
+    public float speedBoost = 0;
+    public float boostDuration = 0;
+    public float jumpMultiplier = 1;
+
+    private Vector3 moveDirection = new Vector3(0, 0, 0);
     private float TimeSinceLastGround = 0;
     private bool isJumping = false;
     //private int jumpBuffer = 0; //TODO add a jump buffer for inputting jump before hitting ground
@@ -87,6 +94,11 @@ public class PlayerController : MonoBehaviour
         aud = MusicSystem.GetComponent<AudioSource>();
 
         haveThought("I should go to work");
+
+        //TEST
+        Song s = MusicSystem.GetComponent<MusicSystem>().LoadSong("AcousticRock", 2, .08f);
+        MusicSystem.GetComponent<MusicSystem>().SetSong(s);
+        MusicSystem.GetComponent<MusicSystem>().Play();
     }
 
     bool isNight()
@@ -97,6 +109,7 @@ public class PlayerController : MonoBehaviour
     void updateTimeOfDay()
     {
         timeOfDay += Time.deltaTime;
+        boostDuration = Mathf.Max(boostDuration - Time.deltaTime, 0);
         if (timeOfDay > secondsInDay)
         {
             timeOfDay -= secondsInDay;
@@ -104,7 +117,7 @@ public class PlayerController : MonoBehaviour
         }
 
         float distanceFromNoon = Mathf.Abs(timeOfDay - (secondsInDay / 2));
-        BlendedSkybox.SetFloat("_Blend", (1 - (distanceFromNoon / (secondsInDay/2))));
+        BlendedSkybox.SetFloat("_Blend", (1 - (distanceFromNoon / (secondsInDay / 2))));
         //RenderSettings.skybox = Skyboxes[(int)Mathf.Floor((timeOfDay / secondsInDay) * Skyboxes.Length)];
     }
 
@@ -179,7 +192,7 @@ public class PlayerController : MonoBehaviour
     void updateInfoDisplay()
     {
         moneyText.GetComponent<Text>().text = string.Format("Money: ${0}\nEnergy: {1}\nHealth: {2}{3}\nTo Do: {4}\nDay {5} Time {6}",
-            money.ToString("F2"), energy.ToString("F1"), health.ToString("F1"), 
+            money.ToString("F2"), energy.ToString("F1"), health.ToString("F1"),
             isHungry() ? " (hungry)" : "", needToWork ? "work" : "sleep", todaysDate.ToString(), timeOfDay.ToString("F1"));
     }
 
@@ -263,6 +276,11 @@ public class PlayerController : MonoBehaviour
 
         FadeSong(MusicOn);
 
+        if (boostDuration > 0)
+        {
+            speedMultiplier = Mathf.Max(speedMultiplier, 1 + speedBoost);
+        }
+
         lastPosition = transform.position;
         Move();
     }
@@ -291,7 +309,6 @@ public class PlayerController : MonoBehaviour
 
     void OnTriggerEnter(Collider collider)
     {
-        Debug.Log(collider);
         if (collider.gameObject.name == "Trigger")
         {
             // EnvObj
@@ -392,7 +409,7 @@ public class PlayerController : MonoBehaviour
         {
             Vector3 diff = npc.transform.position - position;
             float curDistance = diff.sqrMagnitude;
-           // Debug.Log("Distance to NPC is " + curDistance);
+            // Debug.Log("Distance to NPC is " + curDistance);
             if (curDistance < distance && curDistance < maxRangeAllowed)
             {
                 closest = npc;
@@ -415,6 +432,10 @@ public class PlayerController : MonoBehaviour
 
         moveDirection = (transform.forward * v) + (transform.right * h);
         moveDirection = moveDirection.normalized * moveSpeed * speedMultiplier;
+        if (boostDuration > 0)
+        {
+            moveDirection *= (1 + speedBoost);
+        }
         moveDirection.y = yStore;
 
         if (controller.isGrounded)
@@ -445,6 +466,10 @@ public class PlayerController : MonoBehaviour
         if (isJumping)
         {
             moveDirection.y = jumpForce + Mathf.Pow(speedMultiplier, 1.01f);
+            if (boostDuration > 0)
+            {
+                moveDirection.y *= (1 + jumpMultiplier);
+            }
             //gameObject.transform.Find("R_arm").gameObject //TODO
         }
         else
@@ -484,7 +509,12 @@ public class PlayerController : MonoBehaviour
 
     public void ExcellentBeat()
     {
-        speedMultiplier = Mathf.Max(speedMultiplier + .01f, Mathf.Min(speedMultiplier * EXCELLENT_BEAT_MULTIPLIER, maxSpeedMultiplier));
+        speedMultiplier = Mathf.Max(speedMultiplier + .1f, Mathf.Min(speedMultiplier * EXCELLENT_BEAT_MULTIPLIER, maxSpeedMultiplier));
+    }
+
+    public void GreatBeat()
+    {
+        speedMultiplier = Mathf.Max(speedMultiplier + .01f, Mathf.Min(speedMultiplier * GOOD_BEAT_MULTIPLIER, maxSpeedMultiplier));
     }
 
     public void GoodBeat()
