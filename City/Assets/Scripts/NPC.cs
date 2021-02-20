@@ -6,6 +6,7 @@ public class NPC : MonoBehaviour
 {
     public string speech;
     public string characterName;
+    public string portraitName;
     public bool talksFirst;
     public Familiarity fam = new Familiarity();
     public Vector3 origin;
@@ -53,6 +54,11 @@ public class NPC : MonoBehaviour
     public string GetName()
     {
         return characterName;
+    }
+
+    public string GetPortrait()
+    {
+        return portraitName;
     }
 
     void StopMoving()

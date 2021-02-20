@@ -222,7 +222,6 @@ public class MusicItem : Item
         FileInfo[] info = dir.GetFiles("*");
         string randomSong = Path.GetFileNameWithoutExtension(info[Random.Range(0, info.Length)].Name);
         randomSong = Path.GetFileNameWithoutExtension(randomSong); // cut off both extensions, e.g. .mp3.meta
-        Debug.Log("Randomly picked song " + randomSong);
         ret.song = MusicSystem.instance.LoadSong(randomSong, 1, .05f);
         ret.cost = 100;
         ret.color = new Color(

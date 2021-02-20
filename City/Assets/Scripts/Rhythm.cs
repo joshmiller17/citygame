@@ -11,7 +11,7 @@ public class Rhythm
 
     public Rhythm(string filePath)
     {
-        Debug.Log("Loading rhythm: " + filePath);
+        //Debug.Log("Loading rhythm: " + filePath);
         TextAsset rhythmData = Resources.Load<TextAsset>(filePath);
         List<float> t = new List<float>();
         List<int> c = new List<int>();

@@ -70,6 +70,7 @@ public class PlayerController : MonoBehaviour
     public GameObject dialogueBox;
     public GameObject talkerBox;
     public GameObject speechBox;
+    public GameObject portrait;
     public GameObject thoughtBox;
     public GameObject thoughtText;
     public GameObject moneyText;
@@ -215,6 +216,7 @@ public class PlayerController : MonoBehaviour
             whosTalking = Talker;
             talkerBox.GetComponent<Text>().text = Talker.GetComponent<NPC>().GetName();
             speechBox.GetComponent<Text>().text = Talker.GetComponent<NPC>().GetSpeech();
+            portrait.GetComponent<Image>().sprite = Resources.Load<Sprite>("Art/Portraits/" + Talker.GetComponent<NPC>().GetPortrait());
             dialogueBox.SetActive(true);
             Talker.GetComponent<NPC>().Interact();
         }

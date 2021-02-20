@@ -23,9 +23,8 @@ public class MusicSystem : MonoBehaviour
         Rhythm r = new Rhythm(RhythmDir + "/" + name);
         Song s = new Song();
         s.rhythm = r;
-        Debug.Log("Loading music " + SongDir + "/" + name);
+        //Debug.Log("Loading music " + SongDir + "/" + name);
         s.clip = Resources.Load<AudioClip>(SongDir + "/" + name);
-        Debug.Log(s.clip);
         s.speedDifficulty = speedDifficulty;
         s.beatDifficulty = beatDifficulty;
         s.name = name;
