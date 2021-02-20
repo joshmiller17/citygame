@@ -9,7 +9,6 @@ public class NameGenerator
 
     public void Init()
     {
-        // TODO set up Tracery
         NPCgrammar = new TraceryGrammar(Resources.Load<TextAsset>("NPCgrammar").text);
         Shopgrammar = new TraceryGrammar(Resources.Load<TextAsset>("Shopgrammar").text);
         NameNPCs();

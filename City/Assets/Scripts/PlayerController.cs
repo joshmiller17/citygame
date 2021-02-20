@@ -7,17 +7,64 @@ public class PlayerController : MonoBehaviour
 {
     public static PlayerController instance;
 
-    public static float EXCELLENT_BEAT_MULTIPLIER = 1.06f;
-    public static float GREAT_BEAT_MULTIPLIER = 1.04f;
-    public static float GOOD_BEAT_MULTIPLIER = 1.03f;
-    public static float OK_BEAT_MULTIPLIER = 1.01f;
-    public static float MISS_BEAT_MULTIPLIER = 0.8f;
+    [Header("Rhythm Multipliers")]
+    public float ExcellentBeatMult;
+    public float GreatBeatMult;
+    public float GoodBeatMult;
+    public float OKBeatMult;
+    public float MissBeatMult;
 
+    [Space(10)]
+    [Header("Global Settings")]
+
+    [Range(0f, 1f)]
+    public float PercentLightInDay;
+    public float SongFadeTime;
+    public bool MusicOn = true;
+
+    [Space(10)]
+    [Header("Global Stats")]
+    public int todaysDate = 0;
+    public float timeOfDay;
+    public int secondsInDay;
+
+    [Space(10)]
+    [Header("Player Settings")]
+    public float CoyoteTime;
+    public float jumpForce;
+    public float jumpDuration;
+    public float energyLostPerSecond;
+    public float foodLostPerEnergy;
+    public float rotateSpeed;
+    public float workPerSecond;
+    public float moveSpeed;
+    public float gravityScale;
+    public float maxSpeedMultiplier;
+    public float maxTalkingRange;
+    public bool YaxisInvert;
+
+    [Space(10)]
+    [Header("Player Stats")]
+    public int MaxHP;
+    public int MaxEnergy;
+    public int MaxFood;
+    public float money;
+    public float energy;
+    public float health;
+    public float food;
+    public float jumpAmountLeft;
+    public float speedMultiplier;
+    public float speedBoost = 0;
+    public float boostDuration = 0;
+    public float jumpMultiplier = 1;
+
+
+    [Header("GameObj Links")]
     public Material BlendedSkybox;
     public Material[] Skyboxes;
     public Text DebugInfo;
     public GameObject TPCamera;
-    public GameObject MusicSystem;
+    public GameObject MusicSysObj;
     public CharacterController controller;
     public Transform pivot;
     public GameObject dialogueBox;
@@ -27,87 +74,46 @@ public class PlayerController : MonoBehaviour
     public GameObject thoughtText;
     public GameObject moneyText;
     public GameObject interactionInfo;
-    public float rotateSpeed;
-    public float workPerSecond;
-    public float money;
-    public float energy;
-    public float health;
-    public float food;
-    public float energyLostPerSecond;
-    public float foodLostPerEnergy;
-
-    public const int BAR_MAX = 100;
-
-    public const float NIGHT_RATIO = 0.75f;
-
-
-    public NameGenerator NameGen = new NameGenerator();
-
-    //TODO link to character model
-
-    public float SongFadeTime;
-    public float CoyoteTime;
-    public float jumpForce;
-    public float jumpDuration;
-
-    public bool YaxisInvert;
-
-    public float moveSpeed;
-    public float gravityScale;
-    public float maxSpeedMultiplier;
-    public float maxTalkingRange;
-
-    public int todaysDate = 0;
-    public float timeOfDay;
-    public int secondsInDay; //0 = early morning, i.e. 6am
-
-
-    public float jumpAmountLeft;
-    public float speedMultiplier;
-
-    public float speedBoost = 0;
-    public float boostDuration = 0;
-    public float jumpMultiplier = 1;
-
+    public MusicSystem MusicSys;
+    // TODO character model
+    
     private Vector3 moveDirection = new Vector3(0, 0, 0);
     private float TimeSinceLastGround = 0;
     private bool isJumping = false;
     //private int jumpBuffer = 0; //TODO add a jump buffer for inputting jump before hitting ground
 
     private AudioSource aud;
-    private bool MusicOn = true;
-
+    private NameGenerator NameGen = new NameGenerator();
     private GameObject whosTalking = null;
     private float thoughtTimer = 0;
     private bool hungry = false;
     private bool needToWork = true;
     private bool working = false;
     private Shop availableShop = null;
-
     private Vector3 lastPosition;
 
-    // Start is called before the first frame update
     void Start()
     {
         instance = this;
         speedMultiplier = 1;
+        MusicSys = MusicSysObj.GetComponent<MusicSystem>();
 
         controller = GetComponent<CharacterController>();
-        aud = MusicSystem.GetComponent<AudioSource>();
+        aud = MusicSys.GetComponent<AudioSource>();
 
         haveThought("I should go to work");
 
         //TEST
-        Song s = MusicSystem.GetComponent<MusicSystem>().LoadSong("AcousticRock", 2, .08f);
-        MusicSystem.GetComponent<MusicSystem>().SetSong(s);
-        MusicSystem.GetComponent<MusicSystem>().Play();
+        Song s = MusicSys.LoadSong("AcousticRock", 2, .08f);
+        MusicSys.SetSong(s);
+        MusicSys.PlayIfNeeded();
 
         NameGen.Init();
     }
 
     bool isNight()
     {
-        return timeOfDay >= secondsInDay * NIGHT_RATIO;
+        return timeOfDay >= secondsInDay * PercentLightInDay;
     }
 
     void updateTimeOfDay()
@@ -141,7 +147,7 @@ public class PlayerController : MonoBehaviour
     {
         if (working)
         {
-            if (health <= BAR_MAX / 2 || isNight())
+            if (health <= MaxHP / 2 || isNight())
             {
                 stopWorking();
             }
@@ -240,31 +246,38 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void ToggleMusic()
+    public void ToggleMusic()
     {
         BeatSpawner.instance.Toggle();
         MusicOn = !MusicOn;
+        MusicSys.PlayIfNeeded();
     }
 
     void limitBarMax()
     {
-        if (energy > BAR_MAX)
+        if (energy > MaxEnergy)
         {
-            energy = BAR_MAX;
+            energy = MaxEnergy;
         }
-        if (health > BAR_MAX)
+        if (health > MaxHP)
         {
-            health = BAR_MAX;
+            health = MaxHP;
         }
-        if (food > BAR_MAX)
+        if (food > MaxFood)
         {
-            food = BAR_MAX;
+            food = MaxFood;
         }
     }
 
     // Update is called once per frame
     void Update()
     {
+
+        // TEST
+        if (Input.GetKeyDown("i"))
+        {
+            Inventory.instance.Toggle();
+        }
 
         updateTimeOfDay();
         updateThoughtTimer();
@@ -344,9 +357,9 @@ public class PlayerController : MonoBehaviour
                 if (timeOfDay > secondsInDay / 2)
                 {
                     needToWork = true;
-                    float sleep_amount = ((secondsInDay - timeOfDay) / secondsInDay) * 2 * BAR_MAX;
+                    float sleep_amount = ((secondsInDay - timeOfDay) / secondsInDay) * 2 * MaxEnergy;
                     Debug.Log("Slept for " + sleep_amount.ToString("F1"));
-                    energy = Mathf.Min(BAR_MAX, energy + sleep_amount);
+                    energy = Mathf.Min(MaxEnergy, energy + sleep_amount);
                     timeOfDay = secondsInDay - 1;
                     haveThought("I should work");
                 }
@@ -513,27 +526,27 @@ public class PlayerController : MonoBehaviour
 
     public void ExcellentBeat()
     {
-        speedMultiplier = Mathf.Max(speedMultiplier + .1f, Mathf.Min(speedMultiplier * EXCELLENT_BEAT_MULTIPLIER, maxSpeedMultiplier));
+        speedMultiplier = Mathf.Max(speedMultiplier + .1f, Mathf.Min(speedMultiplier * ExcellentBeatMult, maxSpeedMultiplier));
     }
 
     public void GreatBeat()
     {
-        speedMultiplier = Mathf.Max(speedMultiplier + .01f, Mathf.Min(speedMultiplier * GOOD_BEAT_MULTIPLIER, maxSpeedMultiplier));
+        speedMultiplier = Mathf.Max(speedMultiplier + .01f, Mathf.Min(speedMultiplier * GoodBeatMult, maxSpeedMultiplier));
     }
 
     public void GoodBeat()
     {
-        speedMultiplier = Mathf.Max(speedMultiplier + .001f, Mathf.Min(speedMultiplier * GOOD_BEAT_MULTIPLIER, maxSpeedMultiplier));
+        speedMultiplier = Mathf.Max(speedMultiplier + .001f, Mathf.Min(speedMultiplier * GoodBeatMult, maxSpeedMultiplier));
     }
 
     public void OKBeat()
     {
-        speedMultiplier = Mathf.Max(speedMultiplier + .0001f, Mathf.Min(speedMultiplier * OK_BEAT_MULTIPLIER, maxSpeedMultiplier));
+        speedMultiplier = Mathf.Max(speedMultiplier + .0001f, Mathf.Min(speedMultiplier * OKBeatMult, maxSpeedMultiplier));
     }
 
     public void MissBeat()
     {
-        speedMultiplier = Mathf.Min(speedMultiplier, Mathf.Max(speedMultiplier * MISS_BEAT_MULTIPLIER, 1));
+        speedMultiplier = Mathf.Min(speedMultiplier, Mathf.Max(speedMultiplier * MissBeatMult, 1));
     }
 
 }

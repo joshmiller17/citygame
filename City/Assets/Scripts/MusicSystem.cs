@@ -5,13 +5,15 @@ using UnityEngine;
 
 public class MusicSystem : MonoBehaviour
 {
-    public MusicSystem instance;
+    public static MusicSystem instance;
     public string SongDir;
     public string RhythmDir;
     public Song song;
     public GameObject BeatSpawner;
 
-    void Start()
+    private Song lastSongPlayed;
+
+    void Awake()
     {
         instance = this;
     }
@@ -32,16 +34,24 @@ public class MusicSystem : MonoBehaviour
 
     public void SetSong(Song s)
     {
+        Debug.Log("Song set to " + s.name);
         song = s;
         gameObject.GetComponent<AudioSource>().clip = song.clip;
-        Debug.Log(s.clip);
         BeatSpawner.GetComponent<BeatSpawner>().SetSong(song);
     }
 
-    public void Play()
+    public void PlayIfNeeded()
+    {
+        if (song != lastSongPlayed)
+        {
+            Play();
+            lastSongPlayed = song;
+        }
+    }
+
+    private void Play()
     {
         Debug.Log("Now playing: " + song.name);
-        Debug.Log(song.clip);
         gameObject.GetComponent<AudioSource>().Play();
         BeatSpawner.GetComponent<BeatSpawner>().Play();
     }

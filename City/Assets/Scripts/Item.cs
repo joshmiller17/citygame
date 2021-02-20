@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -206,24 +207,34 @@ public class TravelItem : Item
 
 public class MusicItem : Item
 {
-    public enum Difficulty { Easy, Normal, Hard };
-
     public Color color;
-    public string music = null;
-    public Difficulty difficulty = Difficulty.Normal;
+    public Song song;
 
     void Awake()
     {
         type = ItemType.Music;
-        color = new Color(
+    }
+
+    public static MusicItem BaseItem()
+    {
+        MusicItem ret = new MusicItem();
+        DirectoryInfo dir = new DirectoryInfo("Assets/Resources/Audio/Music/");
+        FileInfo[] info = dir.GetFiles("*");
+        string randomSong = Path.GetFileNameWithoutExtension(info[Random.Range(0, info.Length)].Name);
+        randomSong = Path.GetFileNameWithoutExtension(randomSong); // cut off both extensions, e.g. .mp3.meta
+        Debug.Log("Randomly picked song " + randomSong);
+        ret.song = MusicSystem.instance.LoadSong(randomSong, 1, .05f);
+        ret.cost = 100;
+        ret.color = new Color(
          Random.Range(0f, 1f),
          Random.Range(0f, 1f),
          Random.Range(0f, 1f)
         );
+        return ret;
     }
 
     public override void Use()
     {
-
+        Inventory.instance.musicItems.Add(this);
     }
 }

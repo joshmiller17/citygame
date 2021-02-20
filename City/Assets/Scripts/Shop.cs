@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Shop : MonoBehaviour
 {
-    public enum ShopType { Food, Junk, Energy, Coffee, Travel, Music};
+    public enum ShopType { Food, Junk, Energy, Coffee, Music, Travel};
 
     public Item[] inventory = new Item[3];
     public float priceModifier;
@@ -26,7 +26,7 @@ public class Shop : MonoBehaviour
         priceModifier = Random.Range(0.5f, 2.0f);
         valueModifier = Random.Range(0.5f, 2.0f);
         shopRandomness = Random.Range(0.1f, 2.0f);
-        shopType = (ShopType)Random.Range(3, 4); // TODO add more range as I write and test shops
+        shopType = (ShopType)Random.Range(4, 5); // TODO FIXME add more range as I write and test shops
 
         //actual rolling
         itemRandomness = Random.Range(-1f * shopRandomness, shopRandomness);
@@ -123,6 +123,21 @@ public class Shop : MonoBehaviour
         return c;
     }
 
+    MusicItem GenerateMusicItem(float itemRand)
+    {
+        MusicItem m = new MusicItem();
+        m = MusicItem.BaseItem();
+        m.value *= valueModifier * itemRand;
+        m.cost *= priceModifier * itemRand;
+        m.song.beatDifficulty = Mathf.Max(1, Mathf.Min(3, (int)Mathf.Round(m.value / 3)));
+        m.song.speedDifficulty += Random.Range(-0.03f, 0.06f); // FIXME? Hardcoded range of speed not even based on value, price etc
+        m.cost = Mathf.Round(m.cost * 100f) / 100f; //Round to 2 places
+        m.icon = "headphones";
+        m.itemName = m.song.name;
+        m.description = string.Format("Difficulty: {0}\nSpeed: {1}", m.song.beatDifficulty, (100 * m.song.speedDifficulty).ToString("F1"));
+        return m;
+    }
+
     void ResetInventory()
     {
         for (int i = 0; i < inventory.Length; i++)
@@ -156,7 +171,7 @@ public class Shop : MonoBehaviour
                     //TODO
                     break;
                 case ShopType.Music:
-                    //TODO
+                    inventory[i] = GenerateMusicItem(itemRand);
                     break;
             }
         }
