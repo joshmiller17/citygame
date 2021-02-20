@@ -1,0 +1,4 @@
+{
+"origin":["Test Store"],
+"symbol":"s"
+}

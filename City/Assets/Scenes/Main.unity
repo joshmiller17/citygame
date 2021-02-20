@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.5197985, g: 0.53652704, b: 0.7457949, a: 1}
+  m_IndirectSpecularColor: {r: 0.66278124, g: 0.6836481, b: 0.84736454, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -2034,6 +2034,9 @@ MonoBehaviour:
   secondsInDay: 30
   jumpAmountLeft: 0
   speedMultiplier: 1
+  speedBoost: 0
+  boostDuration: 0
+  jumpMultiplier: 1
 --- !u!222 &682783591
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -6380,6 +6383,31 @@ PrefabInstance:
         type: 3}
       propertyPath: speech
       value: Hi I'm bob
+      objectReference: {fileID: 0}
+    - target: {fileID: 3583212578140892844, guid: e70139fb5dc71d746a402cab539be56f,
+        type: 3}
+      propertyPath: speed
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3583212578140892844, guid: e70139fb5dc71d746a402cab539be56f,
+        type: 3}
+      propertyPath: jittery
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 3583212578140892844, guid: e70139fb5dc71d746a402cab539be56f,
+        type: 3}
+      propertyPath: wanderlust
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3583212578140892844, guid: e70139fb5dc71d746a402cab539be56f,
+        type: 3}
+      propertyPath: indecision
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3583212578140892844, guid: e70139fb5dc71d746a402cab539be56f,
+        type: 3}
+      propertyPath: decisiveness
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 7139188516144154080, guid: e70139fb5dc71d746a402cab539be56f,
         type: 3}

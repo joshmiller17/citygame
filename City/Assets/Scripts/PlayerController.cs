@@ -41,6 +41,8 @@ public class PlayerController : MonoBehaviour
     public const float NIGHT_RATIO = 0.75f;
 
 
+    public NameGenerator NameGen = new NameGenerator();
+
     //TODO link to character model
 
     public float SongFadeTime;
@@ -99,6 +101,8 @@ public class PlayerController : MonoBehaviour
         Song s = MusicSystem.GetComponent<MusicSystem>().LoadSong("AcousticRock", 2, .08f);
         MusicSystem.GetComponent<MusicSystem>().SetSong(s);
         MusicSystem.GetComponent<MusicSystem>().Play();
+
+        NameGen.Init();
     }
 
     bool isNight()
