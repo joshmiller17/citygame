@@ -57,6 +57,10 @@ public class BeatSpawner : MonoBehaviour
 
     void Update()
     {
+        if (!MusicSystem.instance.gameObject.GetComponent<AudioSource>().isPlaying)
+        {
+            Playing = false;
+        }
         if (!Playing) return;
         TriggerBeatSpawnIfNeeded();
         ReceiveBeats();
@@ -117,7 +121,6 @@ public class BeatSpawner : MonoBehaviour
 
     void SpawnBeat()
     {
-        if (!IsActive) return;
         GameObject NewBeat = Instantiate(BeatPrefab, transform);
         NewBeat.transform.SetParent(gameObject.transform);
         float timeLeft = NextBeat - SongTimer;
@@ -157,6 +160,25 @@ public class BeatSpawner : MonoBehaviour
         PlayerController.instance.MissBeat();
     }
 
+    void SpawnFeedback(string text, Color color)
+    {
+        GameObject feedbackText = Instantiate(FeedbackPrefab, transform);
+        feedbackText.transform.position = transform.position + UnityEngine.Random.insideUnitSphere * 100;
+        feedbackText.transform.SetParent(PlayerController.instance.transform);
+        feedbackText.GetComponent<Text>().text = text;
+        feedbackText.GetComponent<Text>().color = color;
+        Destroy(feedbackText, 1.0f);
+    }
+
+    void CorrectBeat(string text, Color color)
+    {
+        BeatController LastBeat = Beats[0].GetComponent<BeatController>();
+        Debug.Log(text);
+        SpawnFeedback(text, Color.yellow);
+        LastBeat.transform.localScale = new Vector3(1, 1, 1);
+        LastBeat.DeleteBeat();
+    }
+
     void ReceiveBeats()
     {
         if (Beats.Count - 1 > 0 && IsActive)
@@ -168,55 +190,22 @@ public class BeatSpawner : MonoBehaviour
 
                 if (Mathf.Abs(targetPos.x - (actualPos + BeatOffset)) < PerfectPercent)
                 {
-                    Debug.Log("Excellent");
-
-                    GameObject feedbackText = Instantiate(FeedbackPrefab, transform);
-                    feedbackText.transform.position = transform.position + UnityEngine.Random.insideUnitSphere * 100;
-                    feedbackText.transform.SetParent(gameObject.transform);
-                    feedbackText.GetComponent<Text>().text = "Excellent";
-                    feedbackText.GetComponent<Text>().color = Color.yellow;
-                    Destroy(feedbackText, 1.0f);
-                    LastBeat.transform.localScale = new Vector3(1, 1, 1);
-                    LastBeat.DeleteBeat();
+                    CorrectBeat("Excellent", Color.yellow);
                     PlayerController.instance.ExcellentBeat();
                 }
                 else if (Mathf.Abs(targetPos.x - (actualPos + BeatOffset)) < GreatPercent)
                 {
-                    Debug.Log("Great");
-                    GameObject feedbackText = Instantiate(FeedbackPrefab, transform);
-                    feedbackText.transform.position = transform.position + UnityEngine.Random.insideUnitSphere * 100;
-                    feedbackText.transform.SetParent(gameObject.transform);
-                    feedbackText.GetComponent<Text>().text = "Great";
-                    feedbackText.GetComponent<Text>().color = Color.green;
-                    Destroy(feedbackText, 1.0f);
-                    LastBeat.transform.localScale = new Vector3(1, 1, 1);
-                    LastBeat.DeleteBeat();
+                    CorrectBeat("Great", Color.green);
                     PlayerController.instance.GreatBeat();
                 }
                 else if (Mathf.Abs(targetPos.x - (actualPos + BeatOffset)) < GoodPercent)
                 {
-                    Debug.Log("Good");
-                    GameObject feedbackText = Instantiate(FeedbackPrefab, transform);
-                    feedbackText.transform.position = transform.position + UnityEngine.Random.insideUnitSphere * 100;
-                    feedbackText.transform.SetParent(gameObject.transform);
-                    feedbackText.GetComponent<Text>().text = "Good";
-                    feedbackText.GetComponent<Text>().color = Color.blue;
-                    Destroy(feedbackText, 1.0f);
-                    LastBeat.transform.localScale = new Vector3(1, 1, 1);
-                    LastBeat.DeleteBeat();
+                    CorrectBeat("Good", Color.cyan);
                     PlayerController.instance.GoodBeat();
                 }
                 else if (Mathf.Abs(targetPos.x - (actualPos + BeatOffset)) < OKPercent)
                 {
-                    Debug.Log("OK");
-                    GameObject feedbackText = Instantiate(FeedbackPrefab, transform);
-                    feedbackText.transform.position = transform.position + UnityEngine.Random.insideUnitSphere * 100;
-                    feedbackText.transform.SetParent(gameObject.transform);
-                    feedbackText.GetComponent<Text>().text = "OK";
-                    feedbackText.GetComponent<Text>().color = Color.red;
-                    Destroy(feedbackText, 1.0f);
-                    LastBeat.transform.localScale = new Vector3(1, 1, 1);
-                    LastBeat.DeleteBeat();
+                    CorrectBeat("OK", Color.red);
                     PlayerController.instance.OKBeat();
                 }
                 else

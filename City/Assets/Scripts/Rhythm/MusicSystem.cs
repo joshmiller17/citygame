@@ -5,17 +5,40 @@ using UnityEngine;
 
 public class MusicSystem : MonoBehaviour
 {
+    public float SecondsBeforeReplay;
     public static MusicSystem instance;
     public string SongDir;
     public string RhythmDir;
     public Song song;
     public GameObject BeatSpawner;
 
+    private float timeUntilReplay = 0f;
+    private bool preparingReplay = false;
+
     private Song lastSongPlayed;
 
     void Awake()
     {
         instance = this;
+    }
+
+    private void Update()
+    {
+        if (preparingReplay)
+        {
+            timeUntilReplay -= Time.deltaTime;
+        }
+        if (!gameObject.GetComponent<AudioSource>().isPlaying && !preparingReplay)
+        {
+            preparingReplay = true;
+            timeUntilReplay = SecondsBeforeReplay;
+            Debug.Log(string.Format("Replaying song in {0} seconds.", SecondsBeforeReplay));
+        }
+        if (preparingReplay && timeUntilReplay <= 0)
+        {
+            preparingReplay = false;
+            Play();
+        }
     }
 
     public Song LoadSong(string name, int beatDifficulty, float speedDifficulty)

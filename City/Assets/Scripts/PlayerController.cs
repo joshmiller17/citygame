@@ -106,7 +106,7 @@ public class PlayerController : MonoBehaviour
         haveThought("I should go to work");
 
         //TEST
-        Song s = MusicSys.LoadSong("AcousticRock", 2, .08f);
+        Song s = MusicSys.LoadSong("AllGoodInTheWood", 2, .08f);
         MusicSys.SetSong(s);
         MusicSys.PlayIfNeeded();
 

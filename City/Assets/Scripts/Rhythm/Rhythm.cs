@@ -25,6 +25,10 @@ public class Rhythm
             {
                 break; //EOF
             }
+            if (float.Parse(data[0]) < 1.5f)
+            {
+                continue; // don't introduce sudden beats in first 1.5 sec, let there be a brief intro
+            }
             t.Add(float.Parse(data[0]));
             c.Add(int.Parse(data[1]));
             d.Add(int.Parse(data[2]));

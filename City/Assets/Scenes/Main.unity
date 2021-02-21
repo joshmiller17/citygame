@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.76354784, g: 0.7874259, b: 0.92042756, a: 1}
+  m_IndirectSpecularColor: {r: 0.5283252, g: 0.54529697, b: 0.75178283, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -7757,7 +7757,7 @@ GameObject:
   - component: {fileID: 705507995}
   - component: {fileID: 705507994}
   m_Layer: 0
-  m_Name: Directional Light
+  m_Name: Sun
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15737,6 +15737,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10a4c8a1bda5ff54e9364465ed4dc137, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  SecondsBeforeReplay: 5
   SongDir: Audio/Music
   RhythmDir: Rhythms
   BeatSpawner: {fileID: 1313779802}
