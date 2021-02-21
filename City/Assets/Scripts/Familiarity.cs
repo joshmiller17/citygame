@@ -38,7 +38,7 @@ public class Familiarity
         return lastDateOfInteraction == PlayerController.instance.todaysDate;
     }
 
-    public void Interact()
+    public bool Interact()
     {
         if (!InteractedToday())
         {
@@ -46,7 +46,9 @@ public class Familiarity
             lastDateOfInteraction = PlayerController.instance.todaysDate;
             UpdateFamiliarity();
             UpdateMinFamiliarity();
+            return true;
         }
+        return false;
     }
 
     public float GetFamiliarity()

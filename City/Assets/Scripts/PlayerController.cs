@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     [Header("Global Settings")]
 
     [Range(0f, 1f)]
+    public string buildID = "Alpha v0.1.0-win"; // hard-coded, could be better, meh
     public float PercentLightInDay;
     public float SongFadeTime;
     public bool MusicOn = true;
@@ -328,7 +329,7 @@ public class PlayerController : MonoBehaviour
 
     void OnTriggerEnter(Collider collider)
     {
-        if (collider.gameObject.name == "Trigger")
+        if (collider.gameObject.name.Contains("Trigger"))
         {
             // EnvObj
             EnvObj envObj = collider.gameObject.GetComponentInParent<EnvObj>();
@@ -411,6 +412,7 @@ public class PlayerController : MonoBehaviour
 
     void LateUpdate()
     {
+        DebugInfo.text = "Build ID: " + buildID;
         DebugInfo.text = "Speed multiplier: " + speedMultiplier.ToString();
         DebugInfo.text += "\nCurrent speed: " + (Vector3.Distance(transform.position, lastPosition)).ToString();
         DebugInfo.text += "\nTime of Day: " + ((timeOfDay / secondsInDay) * 24).ToString("F2");
