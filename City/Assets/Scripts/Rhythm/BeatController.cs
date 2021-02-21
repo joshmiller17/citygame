@@ -5,21 +5,21 @@ using UnityEngine.UI;
 
 public class BeatController : MonoBehaviour
 {
-    public bool IsMirror = false;
     public float timeLeft;
     public int channel = 1;
     private bool IsActive = true;
 
-    private GameObject Mirror;
+    //public bool IsMirror = false;
+    //private GameObject Mirror;
 
     void Start()
     {
-        if (!IsMirror)
-        {
-            Mirror = Instantiate(BeatSpawner.instance.BeatPrefab, transform);
-            Mirror.transform.SetParent(gameObject.transform);
-            Mirror.GetComponent<BeatController>().IsMirror = true;
-        }
+        //if (!IsMirror)
+        //{
+        //    Mirror = Instantiate(BeatSpawner.instance.BeatPrefab, transform);
+        //    Mirror.transform.SetParent(gameObject.transform);
+        //    Mirror.GetComponent<BeatController>().IsMirror = true;
+        //}
     }
 
     public void SetColor(Color c)
@@ -35,35 +35,37 @@ public class BeatController : MonoBehaviour
             Toggle();
         }
         timeLeft -= Time.deltaTime;
-        if (!IsMirror)
+        //if (!IsMirror)
+        //{
+        float target = BeatSpawner.instance.transform.GetChild(1).position.x;
+        float speed = BeatSpawner.instance.CurrentSong.speedDifficulty;
+        float width = BeatSpawner.instance.resolution.width;
+        transform.position = new Vector3(target + -1 * timeLeft * speed * width, BeatSpawner.instance.transform.position.y, 0);
+
+        if (transform.position.x > target)
         {
-            float target = BeatSpawner.instance.transform.position.x;
-            float speed = BeatSpawner.instance.CurrentSong.speedDifficulty;
-            float width = BeatSpawner.instance.resolution.width;
-            transform.position = new Vector3(target + -1 * timeLeft * speed * width, BeatSpawner.instance.transform.position.y, 0);
+            //    transform.localScale = new Vector3(0, 0, 0); //invisible but still active
+            SetColor(Color.black); //test
+        }
 
-            if (transform.position.x > target)
-            {
-                transform.localScale = new Vector3(0, 0, 0); //invisible but still active
-            }
 
-            if (transform.position.x > target + BeatSpawner.instance.ScreenPercentForOK)
+        if (transform.position.x > target + width * BeatSpawner.instance.ScreenPercentForGreat)
+        {
+            if (IsActive)
             {
-                if (IsActive)
-                {
-                    BeatSpawner.instance.MissBeat();
-                }
-                DeleteBeat();
+                BeatSpawner.instance.MissBeat();
             }
+            DeleteBeat();
+        }
 
             //also move mirror
-            Mirror.transform.position = new Vector3(target + - 1 * (transform.position.x - target), transform.position.y, transform.position.z);
-            Mirror.GetComponent<Image>().color = GetComponent<Image>().color;
-        }
-        else
-        {
-            //Mirror
-        }
+        //    Mirror.transform.position = new Vector3(target + - 1 * (transform.position.x - target), transform.position.y, transform.position.z);
+        //    Mirror.GetComponent<Image>().color = GetComponent<Image>().color;
+        //}
+        //else
+        //{
+        //    //Mirror
+        //}
     }
 
     public void DeleteBeat()

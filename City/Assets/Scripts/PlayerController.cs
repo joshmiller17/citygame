@@ -442,7 +442,7 @@ public class PlayerController : MonoBehaviour
 
     bool IsMovingFast()
     {
-        return (Vector3.Distance(transform.position, lastPosition)) > 0.1f;
+        return (Vector3.Distance(transform.position, lastPosition)) > 0.07f;
     }
 
     void Move()

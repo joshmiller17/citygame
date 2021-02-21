@@ -32,6 +32,8 @@ public class BeatSpawner : MonoBehaviour
     private float GoodPercent;
     private float OKPercent;
 
+    private Vector3 targetPos;
+
     public float BeatOffset; // user setting
 
     private bool Playing = false;
@@ -50,6 +52,7 @@ public class BeatSpawner : MonoBehaviour
         GoodPercent = ScreenPercentForGood * Screen.width;
         OKPercent = ScreenPercentForOK * Screen.width;
         resolution = Screen.currentResolution;
+        targetPos = transform.GetChild(1).position;
     }
 
     void Update()
@@ -65,6 +68,7 @@ public class BeatSpawner : MonoBehaviour
             GoodPercent = ScreenPercentForGood * Screen.width;
             OKPercent = ScreenPercentForOK * Screen.width;
             resolution = Screen.currentResolution;
+            targetPos = transform.GetChild(1).position;
         }
     }
 
@@ -116,10 +120,9 @@ public class BeatSpawner : MonoBehaviour
         if (!IsActive) return;
         GameObject NewBeat = Instantiate(BeatPrefab, transform);
         NewBeat.transform.SetParent(gameObject.transform);
-        float targetPos = transform.position.x;
         float timeLeft = NextBeat - SongTimer;
         NewBeat.GetComponent<BeatController>().timeLeft = timeLeft;
-        NewBeat.transform.position = new Vector3(targetPos + -1 * timeLeft * CurrentSong.speedDifficulty * resolution.width, transform.position.y, 0);
+        NewBeat.transform.position = new Vector3(targetPos.x + -1 * timeLeft * CurrentSong.speedDifficulty * resolution.width, transform.position.y, 0);
         if (!IsActive)
         {
             NewBeat.GetComponent<BeatController>().Toggle();
@@ -162,9 +165,8 @@ public class BeatSpawner : MonoBehaviour
             {
                 BeatController LastBeat = Beats[0].GetComponent<BeatController>();
                 float actualPos = LastBeat.transform.position.x;
-                float targetPos = transform.position.x;
 
-                if (Mathf.Abs(targetPos - (actualPos + BeatOffset)) < PerfectPercent)
+                if (Mathf.Abs(targetPos.x - (actualPos + BeatOffset)) < PerfectPercent)
                 {
                     Debug.Log("Excellent");
 
@@ -178,7 +180,7 @@ public class BeatSpawner : MonoBehaviour
                     LastBeat.DeleteBeat();
                     PlayerController.instance.ExcellentBeat();
                 }
-                else if (Mathf.Abs(targetPos - (actualPos + BeatOffset)) < GreatPercent)
+                else if (Mathf.Abs(targetPos.x - (actualPos + BeatOffset)) < GreatPercent)
                 {
                     Debug.Log("Great");
                     GameObject feedbackText = Instantiate(FeedbackPrefab, transform);
@@ -191,7 +193,7 @@ public class BeatSpawner : MonoBehaviour
                     LastBeat.DeleteBeat();
                     PlayerController.instance.GreatBeat();
                 }
-                else if (Mathf.Abs(targetPos - (actualPos + BeatOffset)) < GoodPercent)
+                else if (Mathf.Abs(targetPos.x - (actualPos + BeatOffset)) < GoodPercent)
                 {
                     Debug.Log("Good");
                     GameObject feedbackText = Instantiate(FeedbackPrefab, transform);
@@ -204,7 +206,7 @@ public class BeatSpawner : MonoBehaviour
                     LastBeat.DeleteBeat();
                     PlayerController.instance.GoodBeat();
                 }
-                else if (Mathf.Abs(targetPos - (actualPos + BeatOffset)) < OKPercent)
+                else if (Mathf.Abs(targetPos.x - (actualPos + BeatOffset)) < OKPercent)
                 {
                     Debug.Log("OK");
                     GameObject feedbackText = Instantiate(FeedbackPrefab, transform);
