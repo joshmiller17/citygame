@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿// Author: Josh Aaron Miller
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -98,5 +99,7 @@ public class ThirdPersonCamera : MonoBehaviour
     {
         offset *= (10 - amount) / 10;
     }
+
+
 
 }

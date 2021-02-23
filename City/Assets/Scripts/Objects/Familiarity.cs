@@ -12,9 +12,9 @@ public class Familiarity
 
     void UpdateFamiliarity()
     {
-        int daysMissed = PlayerController.instance.todaysDate - lastDateOfInteraction;
+        int daysMissed = GameManager.instance.todaysDate - lastDateOfInteraction;
         familiarity = Mathf.Max(minimumFamiliarity, familiarity - daysMissed * 0.25f);
-        lastDateUpdated = PlayerController.instance.todaysDate;
+        lastDateUpdated = GameManager.instance.todaysDate;
     }
 
     void UpdateMinFamiliarity()
@@ -35,7 +35,7 @@ public class Familiarity
 
     public bool InteractedToday()
     {
-        return lastDateOfInteraction == PlayerController.instance.todaysDate;
+        return lastDateOfInteraction == GameManager.instance.todaysDate;
     }
 
     public bool Interact()
@@ -43,7 +43,7 @@ public class Familiarity
         if (!InteractedToday())
         {
             familiarity += 1;
-            lastDateOfInteraction = PlayerController.instance.todaysDate;
+            lastDateOfInteraction = GameManager.instance.todaysDate;
             UpdateFamiliarity();
             UpdateMinFamiliarity();
             return true;

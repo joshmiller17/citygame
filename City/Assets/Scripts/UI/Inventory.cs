@@ -30,9 +30,9 @@ public class Inventory : MonoBehaviour
     {
         if (!gameObject.activeInHierarchy)
         {
-            if (PlayerController.instance.MusicOn)
+            if (GameManager.instance.MusicOn)
             {
-                PlayerController.instance.ToggleMusic();
+                GameManager.instance.ToggleMusic();
             }
             Clear();
             LayoutMusic();
@@ -74,10 +74,10 @@ public class Inventory : MonoBehaviour
         foreach (MusicItem m in musicItems)
         {
             GameObject item = Instantiate(InvItemPrefab);
-            item.GetComponent<Button>().onClick.AddListener(delegate { PlayerController.instance.MusicSys.SetSong(m.song); });
+            item.GetComponent<Button>().onClick.AddListener(delegate { GameManager.instance.MusicSys.SetSong(m.song); });
             item.transform.Find("ItemName").GetComponent<Text>().text = m.song.name;
             item.transform.Find("ItemDesc").GetComponent<Text>().text =
-                string.Format("Difficulty: {0}\nSpeed: {1}", m.song.beatDifficulty, (100 * m.song.speedDifficulty).ToString("F1"));
+                string.Format("Difficulty: {0}\nSpeed: {1}", m.song.beatDifficulty, (100 * m.song.speedDifficulty).ToString("F0"));
             item.transform.Find("Image").GetComponent<RawImage>().texture = musicImage;
             item.transform.Find("Image").GetComponent<RawImage>().color = m.color;
             item.transform.SetParent(row.transform);

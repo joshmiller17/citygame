@@ -58,7 +58,7 @@ public class ShopCanvas : MonoBehaviour
             }
             else
             {
-                PlayerController.instance.haveThought("I can't afford that.");
+                GameManager.instance.haveThought("I can't afford that.");
             }
         }
     }

@@ -149,32 +149,27 @@ public class BeatSpawner : MonoBehaviour
         Target.SetActive(IsActive);
     }
 
-    public void MissBeat()
-    {
-        GameObject feedbackText = Instantiate(FeedbackPrefab, transform);
-        feedbackText.transform.position = transform.position + UnityEngine.Random.insideUnitSphere * 100;
-        feedbackText.transform.SetParent(gameObject.transform);
-        feedbackText.GetComponent<Text>().text = "Miss";
-        Destroy(feedbackText, 1.0f);
-        Debug.Log("Miss");
-        PlayerController.instance.MissBeat();
-    }
-
     void SpawnFeedback(string text, Color color)
     {
         GameObject feedbackText = Instantiate(FeedbackPrefab, transform);
-        feedbackText.transform.position = transform.position + UnityEngine.Random.insideUnitSphere * 100;
-        feedbackText.transform.SetParent(PlayerController.instance.transform);
+        feedbackText.transform.position = transform.position + new Vector3(0,150,0) + UnityEngine.Random.insideUnitSphere * 150;
+        feedbackText.transform.SetParent(transform);
         feedbackText.GetComponent<Text>().text = text;
         feedbackText.GetComponent<Text>().color = color;
         Destroy(feedbackText, 1.0f);
+    }
+
+    public void MissBeat()
+    {
+        Debug.Log("Miss");
+        SpawnFeedback("Miss", Color.black);
     }
 
     void CorrectBeat(string text, Color color)
     {
         BeatController LastBeat = Beats[0].GetComponent<BeatController>();
         Debug.Log(text);
-        SpawnFeedback(text, Color.yellow);
+        SpawnFeedback(text, color);
         LastBeat.transform.localScale = new Vector3(1, 1, 1);
         LastBeat.DeleteBeat();
     }
@@ -183,9 +178,11 @@ public class BeatSpawner : MonoBehaviour
     {
         if (Beats.Count - 1 > 0 && IsActive)
         {
-            if (Input.GetMouseButtonDown(0))
+            BeatController LastBeat = Beats[0].GetComponent<BeatController>();
+            if (Input.GetMouseButtonDown(0) && LastBeat.channel == 1 
+                || Input.GetMouseButtonDown(1) && LastBeat.channel == 2)
             {
-                BeatController LastBeat = Beats[0].GetComponent<BeatController>();
+                
                 float actualPos = LastBeat.transform.position.x;
 
                 if (Mathf.Abs(targetPos.x - (actualPos + BeatOffset)) < PerfectPercent)

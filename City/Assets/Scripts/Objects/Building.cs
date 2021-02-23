@@ -9,12 +9,12 @@ public class Building : EnvObj
 
     public override void Start()
     {
-        hideObj = Instantiate(GameManager.instance.cube, transform);
         Bounds b = GetComponentInChildren<Renderer>().bounds;
-        hideObj.transform.SetParent(gameObject.transform);
-        hideObj.transform.localScale = b.extents * 1.05f;
-        hideObj.GetComponent<MeshRenderer>().material = GameManager.instance.defaultMaterials[Random.Range(0, GameManager.instance.defaultMaterials.Length)];
-        hideObj.transform.position = b.center;
+        //hideObj = Instantiate(GameManager.instance.cube, transform);
+        //hideObj.transform.SetParent(gameObject.transform);
+        //hideObj.transform.localScale = b.extents * 1.05f;
+        //hideObj.GetComponent<MeshRenderer>().material = GameManager.instance.defaultMaterials[Random.Range(0, GameManager.instance.defaultMaterials.Length)];
+        //hideObj.transform.position = b.center;
 
         //TODO show extraHideObjs
 

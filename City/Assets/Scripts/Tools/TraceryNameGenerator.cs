@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NameGenerator
+public class TraceryNameGenerator
 {
     public TraceryGrammar NPCgrammar;
     public TraceryGrammar Shopgrammar;

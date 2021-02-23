@@ -146,9 +146,10 @@ public class CoffeeItem : Item
 
     public override void Use()
     {
-        PlayerController.instance.speedBoost = boost;
-        PlayerController.instance.boostDuration = boostDuration;
-        PlayerController.instance.jumpMultiplier = jumpMultiplier;
+        //FIXME
+        //PlayerController.instance.speedBoost = boost;
+        //PlayerController.instance.boostDuration = boostDuration;
+        //PlayerController.instance.jumpMultiplier = jumpMultiplier;
     }
 }
 

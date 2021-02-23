@@ -6,7 +6,6 @@ public class NPC : EnvObj
 {
     public string speech;
     public string characterName;
-    public string portraitName;
     public bool talksFirst;
     public Vector3 origin;
     public float speed;
@@ -54,11 +53,6 @@ public class NPC : EnvObj
     public string GetName()
     {
         return characterName;
-    }
-
-    public string GetPortrait()
-    {
-        return portraitName;
     }
 
     void StopMoving()
