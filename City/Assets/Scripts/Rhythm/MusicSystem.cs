@@ -7,8 +7,8 @@ public class MusicSystem : MonoBehaviour
 {
     public float SecondsBeforeReplay;
     public static MusicSystem instance;
-    public string SongDir;
-    public string RhythmDir;
+    public AudioClip[] MusicFiles;
+    public TextAsset[] Rhythms;
     public Song song;
     public GameObject BeatSpawner;
 
@@ -41,13 +41,25 @@ public class MusicSystem : MonoBehaviour
         }
     }
 
+    int FindAssets(string name)
+    {
+        for (int i = 0; i < Rhythms.Length; i++)
+        {
+            if (Rhythms[i].name == name && MusicFiles[i].name == name)
+            {
+                return i;
+            } 
+        }
+        throw new System.ArgumentException("Could not find rhythm and music file: " + name);
+    }
+
     public Song LoadSong(string name, int beatDifficulty, float speedDifficulty)
     {
-        Rhythm r = new Rhythm(RhythmDir + "/" + name);
+        int index = FindAssets(name);
+        Rhythm r = new Rhythm(Rhythms[index]);
         Song s = new Song();
         s.rhythm = r;
-        //Debug.Log("Loading music " + SongDir + "/" + name);
-        s.clip = Resources.Load<AudioClip>(SongDir + "/" + name);
+        s.clip = MusicFiles[index];
         s.speedDifficulty = speedDifficulty;
         s.beatDifficulty = beatDifficulty;
         s.name = name;

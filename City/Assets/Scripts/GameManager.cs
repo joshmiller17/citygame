@@ -48,7 +48,7 @@ public class GameManager : MonoBehaviour
 
 
     private AudioSource aud;
-    private TraceryNameGenerator NameGen = new TraceryNameGenerator();
+    //private TraceryNameGenerator NameGen = new TraceryNameGenerator();
     private GameObject whosTalking = null;
     private float thoughtTimer = 0;
     [HideInInspector] public Shop availableShop = null;
@@ -90,7 +90,7 @@ public class GameManager : MonoBehaviour
         MusicSys.SetSong(s);
         MusicSys.PlayIfNeeded();
 
-        NameGen.Init();
+        //NameGen.Init();
     }
 
     public void Update()

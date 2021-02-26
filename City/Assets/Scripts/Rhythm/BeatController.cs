@@ -5,67 +5,86 @@ using UnityEngine.UI;
 
 public class BeatController : MonoBehaviour
 {
+    public static float MaxDistance = 2500;
+
+    public float target;
     public float timeLeft;
     public int channel = 1;
+    public int segs;
+    public float width;
+    public float speed;
+
+    private float startTime;
+    private Color color;
     private bool IsActive = true;
+    private LineRenderer LR;
 
-    //public bool IsMirror = false;
-    //private GameObject Mirror;
 
-    void Start()
+    public void Initialize(float targetDistance, float time, float songSpeed, int chan, int segmentsPerCircle, float lineWidth)
     {
-        //if (!IsMirror)
-        //{
-        //    Mirror = Instantiate(BeatSpawner.instance.BeatPrefab, transform);
-        //    Mirror.transform.SetParent(gameObject.transform);
-        //    Mirror.GetComponent<BeatController>().IsMirror = true;
-        //}
+        LR = gameObject.AddComponent<LineRenderer>();
+        LR.material = BeatSpawner.instance.BeatMaterial;
+        target = targetDistance;
+        startTime = time;
+        timeLeft = time;
+        channel = chan;
+        speed = songSpeed;
+        segs = segmentsPerCircle;
+        width = lineWidth;
+        SetColor();
+        LR = Helpers.DrawCircle(LR, segs, target + DistanceToTarget(), width);
     }
 
-    public void SetColor(Color c)
+    float DistanceToTarget()
     {
-        GetComponent<Image>().color = c;
+        return (timeLeft / startTime) * (MaxDistance * speed);
+    }
+
+    void SetColor()
+    {
+        switch (channel)
+        {
+            case 1:
+                color = Color.red;
+                break;
+            case 2:
+                color = new Color(0, 0.2f, 1);
+                break;
+            case 3:
+                color = new Color(1, 0.2f, 1);
+                break;
+        }
+        if (timeLeft < 0)
+        {
+            float badness = Mathf.Abs(timeLeft);
+            color = (color * badness);
+        }
+        LR.material.color = color;
     }
 
     // Update is called once per frame
     void Update()
     {
+        
         if (IsActive != BeatSpawner.instance.IsActive)
         {
             Toggle();
         }
         timeLeft -= Time.deltaTime;
-        //if (!IsMirror)
-        //{
-        float target = BeatSpawner.instance.transform.GetChild(1).position.x;
-        float speed = BeatSpawner.instance.CurrentSong.speedDifficulty;
-        float width = BeatSpawner.instance.resolution.width;
-        transform.position = new Vector3(target + -1 * timeLeft * speed * width, BeatSpawner.instance.transform.position.y, 0);
-
-        if (transform.position.x > target)
+        if (timeLeft < 0)
         {
-            //    transform.localScale = new Vector3(0, 0, 0); //invisible but still active
-            SetColor(Color.black); //test
-        }
-
-
-        if (transform.position.x > target + width * BeatSpawner.instance.ScreenPercentForGreat)
-        {
-            if (IsActive)
+            speed = speed * 0.8f;
+            if (Mathf.Abs(timeLeft) > BeatSpawner.instance.OKTimeWindow)
             {
                 BeatSpawner.instance.MissBeat();
+                DeleteBeat();
             }
-            DeleteBeat();
         }
+        LR = Helpers.DrawCircle(LR, segs, target + DistanceToTarget(), width);
+        SetColor();
 
-            //also move mirror
-        //    Mirror.transform.position = new Vector3(target + - 1 * (transform.position.x - target), transform.position.y, transform.position.z);
-        //    Mirror.GetComponent<Image>().color = GetComponent<Image>().color;
-        //}
-        //else
-        //{
-        //    //Mirror
-        //}
+        // animate LR
+        LR.transform.position = new Vector3(LR.transform.position.x, BeatSpawner.instance.transform.position.y /*bounce:*/ /*+ Mathf.Abs(0.5f * (Mathf.Sin(Time.time)))*/, LR.transform.position.z);
     }
 
     public void DeleteBeat()

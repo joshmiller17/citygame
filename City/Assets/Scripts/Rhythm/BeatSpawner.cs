@@ -8,33 +8,29 @@ public class BeatSpawner : MonoBehaviour
 {
     public static BeatSpawner instance;
 
+    [Header("Links")]
     public AudioClip Hit;
     public AudioClip Hit2;
-    public GameObject BeatPrefab;
     public GameObject FeedbackPrefab;
-    public GameObject Background;
-    public GameObject Target;
-    public List<GameObject> Beats;
+    public Material BeatMaterial;
+    public GameObject BeatFeedbackSpawner;
 
-    public bool IsActive = true;
-    public Song CurrentSong;
-    public Rhythm CurrentRhythm;
-    public float ScreenPercentForPerfect;
-    public float ScreenPercentForGreat;
-    public float ScreenPercentForGood;
-    public float ScreenPercentForOK;
-    public int MAX_BEATS;
-    public Resolution resolution;
-
-
-    private float PerfectPercent;
-    private float GreatPercent;
-    private float GoodPercent;
-    private float OKPercent;
-
-    private Vector3 targetPos;
-
+    [Space(10)]
+    [Header("Settings")]
+    public float TargetDistance = 5;
+    public float ExcellentTimeWindow = .05f;
+    public float GreatTimeWindow = .1f;
+    public float GoodTimeWindow = .2f;
+    public float OKTimeWindow = .4f;
+    public int MaxBeats = 6;
     public float BeatOffset; // user setting
+    public int segmentsPerCircle = 15;
+    public float lineWidth = 0.1f;
+
+    [HideInInspector] public bool IsActive = true;
+    [HideInInspector] public Song CurrentSong;
+    [HideInInspector] public Rhythm CurrentRhythm;
+    [HideInInspector] public List<GameObject> Beats;
 
     private bool Playing = false;
     private int CurrentBeatIndex = 0;
@@ -42,17 +38,15 @@ public class BeatSpawner : MonoBehaviour
     private float NextBeat = 0;
     private int NextChannel;
     private int NextDifficulty;
+    private LineRenderer LR;
 
     void Start()
     {
         instance = this;
-        transform.position = new Vector3(Screen.width / 2, Screen.height * 0.1f, 0);
-        PerfectPercent = ScreenPercentForPerfect * Screen.width;
-        GreatPercent = ScreenPercentForGreat * Screen.width;
-        GoodPercent = ScreenPercentForGood * Screen.width;
-        OKPercent = ScreenPercentForOK * Screen.width;
-        resolution = Screen.currentResolution;
-        targetPos = transform.GetChild(1).position;
+        LR = gameObject.AddComponent<LineRenderer>();
+        LR = Helpers.DrawCircle(LR, segmentsPerCircle, TargetDistance, lineWidth);
+        LR.material = BeatMaterial;
+        LR.material.color = Color.white;
     }
 
     void Update()
@@ -64,16 +58,7 @@ public class BeatSpawner : MonoBehaviour
         if (!Playing) return;
         TriggerBeatSpawnIfNeeded();
         ReceiveBeats();
-
-        if (resolution.width != Screen.width /*height info not needed at this time*/)
-        {
-            PerfectPercent = ScreenPercentForPerfect * Screen.width;
-            GreatPercent = ScreenPercentForGreat * Screen.width;
-            GoodPercent = ScreenPercentForGood * Screen.width;
-            OKPercent = ScreenPercentForOK * Screen.width;
-            resolution = Screen.currentResolution;
-            targetPos = transform.GetChild(1).position;
-        }
+        LR.transform.Rotate(new Vector3(0, 1, 0));
     }
 
     public void SetSong(Song s)
@@ -97,7 +82,7 @@ public class BeatSpawner : MonoBehaviour
     {
         SongTimer += Time.deltaTime;
 
-        if (Beats.Count < MAX_BEATS * CurrentSong.beatDifficulty) //scale max beats with difficulty
+        if (Beats.Count < MaxBeats * CurrentSong.beatDifficulty) //scale max beats with difficulty
         {
             CurrentBeatIndex += 1;
             Tuple<float, int, int> next = CurrentRhythm.GetBeat(CurrentBeatIndex);
@@ -121,20 +106,10 @@ public class BeatSpawner : MonoBehaviour
 
     void SpawnBeat()
     {
-        GameObject NewBeat = Instantiate(BeatPrefab, transform);
+        GameObject NewBeat = Instantiate(new GameObject("Beat"), transform);
+        BeatController bc = NewBeat.AddComponent<BeatController>();
         NewBeat.transform.SetParent(gameObject.transform);
-        float timeLeft = NextBeat - SongTimer;
-        NewBeat.GetComponent<BeatController>().timeLeft = timeLeft;
-        NewBeat.transform.position = new Vector3(targetPos.x + -1 * timeLeft * CurrentSong.speedDifficulty * resolution.width, transform.position.y, 0);
-        if (!IsActive)
-        {
-            NewBeat.GetComponent<BeatController>().Toggle();
-        }
-        if (NextChannel == 2)
-        {
-            NewBeat.GetComponent<BeatController>().SetColor(Color.blue);
-            NewBeat.GetComponent<BeatController>().channel = 2;
-        }
+        bc.Initialize(TargetDistance, NextBeat - SongTimer, CurrentSong.speedDifficulty, NextChannel, segmentsPerCircle, lineWidth);
         Beats.Add(NewBeat);
     }
 
@@ -145,15 +120,13 @@ public class BeatSpawner : MonoBehaviour
         {
             beat.GetComponent<BeatController>().Toggle();
         }
-        Background.SetActive(IsActive);
-        Target.SetActive(IsActive);
     }
 
     void SpawnFeedback(string text, Color color)
     {
-        GameObject feedbackText = Instantiate(FeedbackPrefab, transform);
-        feedbackText.transform.position = transform.position + new Vector3(0,150,0) + UnityEngine.Random.insideUnitSphere * 150;
-        feedbackText.transform.SetParent(transform);
+        GameObject feedbackText = Instantiate(FeedbackPrefab, BeatFeedbackSpawner.transform);
+        feedbackText.transform.position = BeatFeedbackSpawner.transform.position + new Vector3(0,0,0) + UnityEngine.Random.insideUnitSphere * 100;
+        feedbackText.transform.SetParent(BeatFeedbackSpawner.transform);
         feedbackText.GetComponent<Text>().text = text;
         feedbackText.GetComponent<Text>().color = color;
         Destroy(feedbackText, 1.0f);
@@ -170,7 +143,6 @@ public class BeatSpawner : MonoBehaviour
         BeatController LastBeat = Beats[0].GetComponent<BeatController>();
         Debug.Log(text);
         SpawnFeedback(text, color);
-        LastBeat.transform.localScale = new Vector3(1, 1, 1);
         LastBeat.DeleteBeat();
     }
 
@@ -179,28 +151,30 @@ public class BeatSpawner : MonoBehaviour
         if (Beats.Count - 1 > 0 && IsActive)
         {
             BeatController LastBeat = Beats[0].GetComponent<BeatController>();
-            if (Input.GetMouseButtonDown(0) && LastBeat.channel == 1 
-                || Input.GetMouseButtonDown(1) && LastBeat.channel == 2)
-            {
-                
-                float actualPos = LastBeat.transform.position.x;
+            float timeDistance = Math.Abs(LastBeat.timeLeft);
 
-                if (Mathf.Abs(targetPos.x - (actualPos + BeatOffset)) < PerfectPercent)
+            if (Input.GetMouseButtonDown(0) && LastBeat.channel == 1 
+                || Input.GetMouseButtonDown(1) && LastBeat.channel == 2
+                || (Input.GetMouseButtonDown(0) && Input.GetMouseButtonDown(1) && LastBeat.channel == 3)
+                )
+            {
+
+                if (timeDistance < ExcellentTimeWindow)
                 {
                     CorrectBeat("Excellent", Color.yellow);
                     PlayerController.instance.ExcellentBeat();
                 }
-                else if (Mathf.Abs(targetPos.x - (actualPos + BeatOffset)) < GreatPercent)
+                else if (timeDistance < GreatTimeWindow)
                 {
                     CorrectBeat("Great", Color.green);
                     PlayerController.instance.GreatBeat();
                 }
-                else if (Mathf.Abs(targetPos.x - (actualPos + BeatOffset)) < GoodPercent)
+                else if (timeDistance < GoodTimeWindow)
                 {
                     CorrectBeat("Good", Color.cyan);
                     PlayerController.instance.GoodBeat();
                 }
-                else if (Mathf.Abs(targetPos.x - (actualPos + BeatOffset)) < OKPercent)
+                else if (timeDistance < OKTimeWindow)
                 {
                     CorrectBeat("OK", Color.red);
                     PlayerController.instance.OKBeat();
@@ -219,7 +193,11 @@ public class BeatSpawner : MonoBehaviour
                     GetComponent<AudioSource>().clip = Hit;
                     GetComponent<AudioSource>().Play();
                 }
-          }
+            }
+            else if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
+            {
+                MissBeat();
+            }
         }
     }
 }

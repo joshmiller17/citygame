@@ -6,11 +6,13 @@ public class TraceryNameGenerator
 {
     public TraceryGrammar NPCgrammar;
     public TraceryGrammar Shopgrammar;
+    public TextAsset NPCtext;
+    public TextAsset Shoptext;
 
     public void Init()
     {
-        NPCgrammar = new TraceryGrammar(Resources.Load<TextAsset>("Text/NPCgrammar").text);
-        Shopgrammar = new TraceryGrammar(Resources.Load<TextAsset>("Text/Shopgrammar").text);
+        NPCgrammar = new TraceryGrammar(NPCtext.text);
+        Shopgrammar = new TraceryGrammar(Shoptext.text);
         NameNPCs();
         NameShops();
     }

@@ -9,10 +9,8 @@ public class Rhythm
     private int[] channels;
     private int[] difficulties;
 
-    public Rhythm(string filePath)
+    public Rhythm(TextAsset rhythmData)
     {
-        //Debug.Log("Loading rhythm: " + filePath);
-        TextAsset rhythmData = Resources.Load<TextAsset>(filePath);
         List<float> t = new List<float>();
         List<int> c = new List<int>();
         List<int> d = new List<int>();
