@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TurnTheGameOn.ArrowWaypointer;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -21,6 +22,7 @@ public class PlayerController : MonoBehaviour
     public float foodLostPerEnergy = 1.5f;
     public float workPerSecond = 5;
     public float maxTalkingRange = 70;
+    public float minimumSpeed = 0.5f;
 
 
     [Space(10)]
@@ -32,9 +34,13 @@ public class PlayerController : MonoBehaviour
     public float energy = 100;
     public float health = 100;
     public float food = 100;
+    public float boostDuration = 0;
+    public float speedBoost = 0;
+    public float jumpBoost = 0;
 
     [Space(10)]
     public CharacterControllerThirdPerson controller;
+    public SmoothFollow PlayerCamera;
 
     [HideInInspector] public bool hungry = false;
     [HideInInspector] public bool needToWork = true;
@@ -50,7 +56,6 @@ public class PlayerController : MonoBehaviour
     {
         if (working)
         {
-            SceneManager.LoadScene("DemoEnd"); // Test remove
             if (health <= MaxHP / 2 || GameManager.instance.isNight())
             {
                 stopWorking();
@@ -83,13 +88,13 @@ public class PlayerController : MonoBehaviour
         {
             health += energy;
             energy = 0;
-            controller.m_MoveSpeedMultiplier *= 0.998f; //can go below 1?
+            controller.m_MoveSpeedMultiplier *= 0.998f;
         }
         if (isHungry())
         {
             health += food;
             food = 0;
-            controller.m_MoveSpeedMultiplier *= 0.998f; //can go below 1?
+            controller.m_MoveSpeedMultiplier *= 0.998f;
 
             if (!hungry)
             {
@@ -101,6 +106,9 @@ public class PlayerController : MonoBehaviour
         {
             hungry = false;
         }
+
+        // cap speed loss
+        controller.m_MoveSpeedMultiplier = Mathf.Max(controller.m_MoveSpeedMultiplier, minimumSpeed);
     }
 
     void limitBarMax()
@@ -122,15 +130,32 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //boostDuration = Mathf.Max(boostDuration - Time.deltaTime, 0);
+        //slow down if not moving fast
+        if (Input.GetAxis("Vertical") < 0.5)
+        {
+            controller.m_MoveSpeedMultiplier = Mathf.Max(controller.m_MoveSpeedMultiplier * .999f, 1);
+        }
+
+        boostDuration = Mathf.Max(boostDuration - Time.deltaTime, 0);
         updateWorking();
         limitBarMax();
         spendEnergy(Time.deltaTime * energyLostPerSecond);
 
-        //if (boostDuration > 0)
-        //{
-        //    controller.m_MoveSpeedMultiplier = Mathf.Max(controller.m_MoveSpeedMultiplier, 1 + speedBoost);
-        //}
+        // adjust camera to speed
+        PlayerCamera.distance = 4 + 1.5f * controller.m_MoveSpeedMultiplier;
+        PlayerCamera.height = 4 + 1.5f * controller.m_MoveSpeedMultiplier;
+        PlayerCamera.rotationDamping = 4 + 1.5f * controller.m_MoveSpeedMultiplier;
+        PlayerCamera.heightDamping = 4 + 1.5f * controller.m_MoveSpeedMultiplier;
+
+        if (boostDuration > 0)
+        {
+            controller.m_MoveSpeedMultiplier = Mathf.Max(controller.m_MoveSpeedMultiplier, 1 + speedBoost);
+            controller.m_JumpBoost = jumpBoost;
+        }
+        else
+        {
+            controller.m_JumpBoost = 0;
+        }
     }
 
 

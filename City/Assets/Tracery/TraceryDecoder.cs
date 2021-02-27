@@ -15,9 +15,9 @@ public class TraceryGrammar {
 
     [ThreadStatic] private static System.Random random;
 
-    public string Generate(int? randomSeed = null)
+    public string Generate(int? randomSeed = null, string startSymbol = "origin")
     {
-        return GenerateFromNode("origin", randomSeed);
+        return GenerateFromNode(startSymbol, randomSeed);
     }
 
     public string GenerateFromNode(string token, int? randomSeed = null)

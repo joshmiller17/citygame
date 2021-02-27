@@ -8,18 +8,21 @@ public class CharacterControllerThirdPerson : MonoBehaviour {
 
 	public float m_MovingTurnSpeed = 360;
 	public float m_StationaryTurnSpeed = 180;
-	public float m_JumpPower = 12f;
+	public float m_JumpPower = 8f;
 	[Range(1f, 4f)]public float m_GravityMultiplier = 2f;
 	public float m_RunCycleLegOffset = 0.2f; //specific to the character in sample assets, will need to be modified to work with others
 	public float m_MoveSpeedMultiplier = 1f;
     public float m_MaxMoveSpeedMultiplier = 4f;
     public float m_AnimSpeedMultiplier = 1f;
 	public float m_GroundCheckDistance = 0.1f;
+    public float m_CoyoteTime = 0.3f;
+    public float m_JumpBuffer = 0.3f;
+    public float m_JumpDuration = 0.3f;
+    public float m_JumpBoost = 0;
 
-
-    // TODO Coyote time
-    // TODO jump duration (how long you can hold)
-    // TODO jump buffer for inputting before can jump
+    private bool m_jumping = false;
+    private float m_JumpPressed = 0;
+    private float m_TimeSinceLastGround = 0;
 
     Rigidbody m_Rigidbody;
 	Animator m_Animator;
@@ -47,8 +50,16 @@ public class CharacterControllerThirdPerson : MonoBehaviour {
 		m_OrigGroundCheckDistance = m_GroundCheckDistance;
 	}
 
+    private void Update()
+    {
+        if (!m_IsGrounded)
+        {
+            m_TimeSinceLastGround += Time.deltaTime;
+        }
+    }
 
-	public void Move(Vector3 move, bool crouch, bool jump)
+
+    public void Move(Vector3 move, bool crouch, bool jump)
 	{
 		// convert the world relative moveInput vector into a local-relative
 		// turn amount and forward amount required to head in the desired
@@ -61,16 +72,25 @@ public class CharacterControllerThirdPerson : MonoBehaviour {
 		m_ForwardAmount = move.z;
 
 		ApplyExtraTurnRotation();
+        m_JumpPressed = Mathf.Max(0, m_JumpPressed - Time.deltaTime);
 
-		// control and velocity handling is different when grounded and airborne:
-		if (m_IsGrounded)
+        // control and velocity handling is different when grounded and airborne:
+        if (m_IsGrounded || m_TimeSinceLastGround < m_CoyoteTime)
 		{
-			HandleGroundedMovement(crouch, jump);
+            if (m_JumpPressed > 0)
+            {
+                jump = true; //jump buffer
+            }
+            HandleGroundedMovement(crouch, jump);
 		}
 		else
 		{
-			HandleAirborneMovement();
-		}
+			HandleAirborneMovement(jump);
+            if (jump)
+            {
+                m_JumpPressed = m_JumpBuffer;
+            }
+        }
 
 		ScaleCapsuleForCrouching(crouch);
 		PreventStandingInLowHeadroom();
@@ -157,10 +177,18 @@ public class CharacterControllerThirdPerson : MonoBehaviour {
 	}
 
 
-	void HandleAirborneMovement()
+	void HandleAirborneMovement(bool jump)
 	{
-		// apply extra gravity from multiplier:
-		Vector3 extraGravityForce = (Physics.gravity * m_GravityMultiplier) - Physics.gravity;
+        if (jump && ((m_jumping && m_TimeSinceLastGround < m_JumpDuration) || (m_TimeSinceLastGround < m_CoyoteTime)))
+        {
+            m_Rigidbody.velocity = new Vector3(m_Rigidbody.velocity.x, m_JumpPower + m_JumpBoost, m_Rigidbody.velocity.z);
+        }
+        else
+        {
+            m_jumping = false;
+        }
+        // apply extra gravity from multiplier:
+        Vector3 extraGravityForce = (Physics.gravity * m_GravityMultiplier) - Physics.gravity;
 		m_Rigidbody.AddForce(extraGravityForce);
 
 		m_GroundCheckDistance = m_Rigidbody.velocity.y < 0 ? m_OrigGroundCheckDistance : 0.01f;
@@ -170,14 +198,19 @@ public class CharacterControllerThirdPerson : MonoBehaviour {
 	void HandleGroundedMovement(bool crouch, bool jump)
 	{
 		// check whether conditions are right to allow a jump:
-		if (jump && !crouch && m_Animator.GetCurrentAnimatorStateInfo(0).IsName("Grounded"))
+		if (jump && !crouch/* && m_Animator.GetCurrentAnimatorStateInfo(0).IsName("Grounded")*/)
 		{
-			// jump!
-			m_Rigidbody.velocity = new Vector3(m_Rigidbody.velocity.x, m_JumpPower, m_Rigidbody.velocity.z);
+            // jump!
+            m_jumping = true;
+            m_Rigidbody.velocity = new Vector3(m_Rigidbody.velocity.x, m_JumpPower + m_JumpBoost, m_Rigidbody.velocity.z);
 			m_IsGrounded = false;
-			m_Animator.applyRootMotion = false;
+			//m_Animator.applyRootMotion = false;
 			m_GroundCheckDistance = 0.1f;
 		}
+        else
+        {
+            m_jumping = false;
+        }
 	}
 
 	void ApplyExtraTurnRotation()
@@ -217,12 +250,14 @@ public class CharacterControllerThirdPerson : MonoBehaviour {
 			m_GroundNormal = hitInfo.normal;
 			m_IsGrounded = true;
 			m_Animator.applyRootMotion = true;
-		}
+            m_TimeSinceLastGround = 0;
+
+        }
 		else
 		{
 			m_IsGrounded = false;
 			m_GroundNormal = Vector3.up;
-			m_Animator.applyRootMotion = false;
+			//m_Animator.applyRootMotion = false; //bleh
 		}
 	}
 

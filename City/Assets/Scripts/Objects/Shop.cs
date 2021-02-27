@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Shop : MonoBehaviour
+public class Shop : Building
 {
     public enum ShopType { Food, Junk, Energy, Coffee, Music, Travel};
 
@@ -18,15 +18,19 @@ public class Shop : MonoBehaviour
     private int dateRestocked = 0;
 
     // Start is called before the first frame update
-    void Start()
+    public override void Start()
     {
+        base.Start();
+        GameObject trigger = transform.Find("Trigger(Clone)").gameObject;
+        trigger.name = "ShopTrigger";
+
         daysUntilClose = Random.Range(1, 9);
 
         //test numbers set
         priceModifier = Random.Range(0.5f, 2.0f);
         valueModifier = Random.Range(0.5f, 2.0f);
         shopRandomness = Random.Range(0.1f, 2.0f);
-        shopType = (ShopType)Random.Range(4, 5); // TODO FIXME add more range as I write and test shops
+        shopType = (ShopType)Random.Range(0, 5); // TODO FIXME add more range as I write and test shops
 
         //actual rolling
         itemRandomness = Random.Range(-1f * shopRandomness, shopRandomness);
@@ -98,7 +102,7 @@ public class Shop : MonoBehaviour
         bool negFlip = Random.value < .5;
         c.boost *= c.boost < 0 && negFlip ? itemRand : 1.0f / itemRand;
         c.boostDuration *= c.boostDuration < 0 && negFlip ? itemRand : 1.0f / itemRand;
-        c.jumpMultiplier *= c.jumpMultiplier < 0 && negFlip ? itemRand : 1.0f / itemRand;
+        c.jumpBoost *= c.jumpBoost < 0 && negFlip ? itemRand : 1.0f / itemRand;
 
         switch (type)
         {

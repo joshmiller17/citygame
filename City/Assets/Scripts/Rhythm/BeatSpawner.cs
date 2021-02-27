@@ -136,6 +136,7 @@ public class BeatSpawner : MonoBehaviour
     {
         Debug.Log("Miss");
         SpawnFeedback("Miss", Color.black);
+        PlayerController.instance.MissBeat();
     }
 
     void CorrectBeat(string text, Color color)

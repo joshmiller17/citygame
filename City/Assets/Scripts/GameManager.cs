@@ -45,10 +45,9 @@ public class GameManager : MonoBehaviour
     public Material[] defaultMaterials;
     public Material[] happyMaterials;
     public GameObject trigger;
-
+    public TraceryNameGenerator NameGen;
 
     private AudioSource aud;
-    //private TraceryNameGenerator NameGen = new TraceryNameGenerator();
     private GameObject whosTalking = null;
     private float thoughtTimer = 0;
     [HideInInspector] public Shop availableShop = null;
@@ -90,7 +89,7 @@ public class GameManager : MonoBehaviour
         MusicSys.SetSong(s);
         MusicSys.PlayIfNeeded();
 
-        //NameGen.Init();
+        NameGen.Init();
     }
 
     public void Update()
@@ -193,12 +192,11 @@ public class GameManager : MonoBehaviour
         npcs = GameObject.FindGameObjectsWithTag("NPC");
         GameObject closest = null;
         float distance = Mathf.Infinity;
-        Vector3 position = transform.position;
+        Vector3 position = PlayerController.instance.transform.position;
         foreach (GameObject npc in npcs)
         {
             Vector3 diff = npc.transform.position - position;
             float curDistance = diff.sqrMagnitude;
-            // Debug.Log("Distance to NPC is " + curDistance);
             if (curDistance < distance && curDistance < maxRangeAllowed)
             {
                 closest = npc;

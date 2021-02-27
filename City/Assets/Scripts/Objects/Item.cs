@@ -105,7 +105,7 @@ public class CoffeeItem : Item
 {
     public float boost;
     public float boostDuration;
-    public float jumpMultiplier;
+    public float jumpBoost;
 
     public enum CoffeeType { Coffee, LongCoffee, JumpCoffee};
 
@@ -122,21 +122,21 @@ public class CoffeeItem : Item
             case CoffeeType.Coffee:
                 ret.boost = 1;
                 ret.boostDuration = 60;
-                ret.jumpMultiplier = -0.5f;
+                ret.jumpBoost = -0.5f;
                 ret.cost = 10;
                 break;
 
             case CoffeeType.LongCoffee:
                 ret.boost = 0.5f;
                 ret.boostDuration = 120;
-                ret.jumpMultiplier = -0.5f;
+                ret.jumpBoost = -0.5f;
                 ret.cost = 20;
                 break;
 
             case CoffeeType.JumpCoffee:
                 ret.boost = 0.1f;
                 ret.boostDuration = 30;
-                ret.jumpMultiplier = 2.0f;
+                ret.jumpBoost = 2.0f;
                 ret.cost = 15;
                 break;
 
@@ -146,10 +146,9 @@ public class CoffeeItem : Item
 
     public override void Use()
     {
-        //FIXME
-        //PlayerController.instance.speedBoost = boost;
-        //PlayerController.instance.boostDuration = boostDuration;
-        //PlayerController.instance.jumpMultiplier = jumpMultiplier;
+        PlayerController.instance.speedBoost = boost;
+        PlayerController.instance.boostDuration = boostDuration;
+        PlayerController.instance.jumpBoost = jumpBoost;
     }
 }
 

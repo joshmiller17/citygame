@@ -5,7 +5,9 @@
 	public class SmoothFollow : MonoBehaviour
 	{
 		public Transform target; // The target we are following
-		public float distance = 10.0f; // The distance in the x-z plane to the target
+
+        [Header("Currently overwritten in code")]
+        public float distance = 5.0f; // The distance in the x-z plane to the target
 		public float height = 5.0f; // the height we want the camera to be above the target
 		public float rotationDamping;
 		public float heightDamping;

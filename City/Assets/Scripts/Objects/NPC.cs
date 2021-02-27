@@ -4,14 +4,19 @@ using UnityEngine;
 
 public class NPC : EnvObj
 {
-    public string speech;
+    public string[] fam1Speeches;
+    public string[] fam2Speeches;
+    public string[] fam3Speeches;
     public string characterName;
     public bool talksFirst;
     public Vector3 origin;
-    public float speed;
-    public float decisiveness;
-    public float jittery;
-    public float wanderlust;
+    [Range(0, 10)] public float speed;
+    [Tooltip("Length of travel in single direction")]
+    [Range(0, 10)] public float decisiveness;
+    [Tooltip("Chance of moving in new direction")]
+    [Range(0, 100)] public float jittery;
+    [Tooltip("Range of motion")]
+    [Range(0, 100)] public float wanderlust;
 
     private float continuing;
     private Vector3 direction = new Vector3(0, 0, 0);
@@ -47,7 +52,18 @@ public class NPC : EnvObj
 
     public string GetSpeech()
     {
-        return speech;
+        if (fam.GetFamiliarity() <= 1)
+        {
+            return fam1Speeches[Random.Range(0, fam1Speeches.Length)];
+        }
+        else if (fam.GetFamiliarity() <= 3)
+        {
+            return fam2Speeches[Random.Range(0, fam1Speeches.Length)];
+        }
+       else
+        {
+            return fam3Speeches[Random.Range(0, fam1Speeches.Length)];
+        }
     }
 
     public string GetName()

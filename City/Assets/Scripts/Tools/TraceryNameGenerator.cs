@@ -1,18 +1,22 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using RandomNameGeneratorLibrary;
+using static Shop;
 
-public class TraceryNameGenerator
+public class TraceryNameGenerator : MonoBehaviour
 {
     public TraceryGrammar NPCgrammar;
     public TraceryGrammar Shopgrammar;
-    public TextAsset NPCtext;
-    public TextAsset Shoptext;
+    public TextAsset NPCText;
+    public TextAsset ShopText;
+    public PersonNameGenerator nameGenerator;
 
     public void Init()
     {
-        NPCgrammar = new TraceryGrammar(NPCtext.text);
-        Shopgrammar = new TraceryGrammar(Shoptext.text);
+        NPCgrammar = new TraceryGrammar(NPCText.text);
+        Shopgrammar = new TraceryGrammar(ShopText.text);
+        nameGenerator = new PersonNameGenerator();
         NameNPCs();
         NameShops();
     }
@@ -35,17 +39,18 @@ public class TraceryNameGenerator
         foreach (GameObject shop in shops)
         {
             Shop s = shop.GetComponent<Shop>();
-            s.storeName = GetShopName();
+            s.storeName = GetShopName(s.shopType);
         }
     }
 
-    public string GetNPCName() // TODO genders
+    public string GetNPCName() // TODO genders???
     {
-        return NPCgrammar.Generate();
+        return nameGenerator.GenerateRandomFirstAndLastName();
+        //return NPCgrammar.Generate();
     }
 
-    public string GetShopName() // TODO shop type
+    public string GetShopName(ShopType t)
     {
-        return Shopgrammar.Generate();
+        return Shopgrammar.Generate(null, t.ToString());
     }
 }
