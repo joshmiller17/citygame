@@ -9,6 +9,15 @@ public class UserControlThirdPerson : MonoBehaviour {
 	private Vector3 m_CamForward;             // The current forward direction of the camera
 	private Vector3 m_Move;                 // the world-relative desired move direction, calculated from the camForward and user input.
 
+    // Inputs
+    private float h;
+    private float v;
+    bool jump;
+    bool crouch;
+    bool inventory;
+    bool cheat;
+    bool musicToggle;
+    bool interact;
 
     private void Start()
     {
@@ -28,18 +37,16 @@ public class UserControlThirdPerson : MonoBehaviour {
         m_Character = GetComponent<CharacterControllerThirdPerson>();
     }
 
-	// Fixed update is called in sync with physics
-	private void FixedUpdate()
-	{
-		// read inputs
-		float h = Input.GetAxis("Horizontal");
-		float v = Input.GetAxis("Vertical");
-        bool jump = Input.GetButton("Jump");
-        bool crouch = Input.GetKey(KeyCode.C);
-        bool inventory = Input.GetKeyDown(KeyCode.I);
-        bool cheat = Input.GetKeyDown(KeyCode.Z);
-        bool musicToggle = Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift);
-        bool interact = Input.GetKeyDown(KeyCode.E);
+    private void Update()
+    {
+       h = Input.GetAxis("Horizontal");
+       v = Input.GetAxis("Vertical");
+       jump = Input.GetButton("Jump");
+       crouch = Input.GetKey(KeyCode.C);
+       inventory = Input.GetKeyDown(KeyCode.I);
+       cheat = Input.GetKeyDown(KeyCode.Z);
+       musicToggle = Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift);
+       interact = Input.GetKeyDown(KeyCode.E);
 
         if (inventory)
         {
@@ -63,6 +70,20 @@ public class UserControlThirdPerson : MonoBehaviour {
             {
                 GameManager.instance.ToggleMusic();
             }
+        }
+    }        
+
+    // Fixed update is called in sync with physics
+    private void FixedUpdate()
+	{
+
+        if (GameManager.instance.IsShopping())
+        {
+            // no movement when shopping
+            h = 0;
+            v = 0;
+            jump = false;
+            crouch = false;
         }
 
         // calculate move direction to pass to character

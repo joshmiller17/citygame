@@ -9,11 +9,14 @@ public class BeatSpawner : MonoBehaviour
     public static BeatSpawner instance;
 
     [Header("Links")]
-    public AudioClip Hit;
-    public AudioClip Hit2;
     public GameObject FeedbackPrefab;
     public Material BeatMaterial;
     public GameObject BeatFeedbackSpawner;
+    public AudioClip[] ExcellentSounds;
+    public AudioClip[] GreatSounds;
+    public AudioClip[] GoodSounds;
+    public AudioClip[] OKSounds;
+    public AudioClip[] MissSounds;
 
     [Space(10)]
     [Header("Settings")]
@@ -104,6 +107,15 @@ public class BeatSpawner : MonoBehaviour
         }
     }
 
+    public void ClearBeats()
+    {
+        foreach (GameObject beat in Beats)
+        {
+            Destroy(beat);
+        }
+        Beats.Clear();
+    }
+
     void SpawnBeat()
     {
         GameObject NewBeat = Instantiate(new GameObject("Beat"), transform);
@@ -119,6 +131,15 @@ public class BeatSpawner : MonoBehaviour
         foreach (GameObject beat in Beats)
         {
             beat.GetComponent<BeatController>().Toggle();
+        }
+
+        if (!IsActive)
+        {
+            transform.localScale = new Vector3(0, 0, 0);
+        }
+        else
+        {
+            transform.localScale = new Vector3(1, 1, 1);
         }
     }
 
@@ -145,6 +166,13 @@ public class BeatSpawner : MonoBehaviour
         Debug.Log(text);
         SpawnFeedback(text, color);
         LastBeat.DeleteBeat();
+        
+    }
+
+    void PlayRandomSound(AudioClip[] sounds)
+    {
+        GetComponent<AudioSource>().clip = sounds[UnityEngine.Random.Range(0, sounds.Length)];
+        GetComponent<AudioSource>().Play();
     }
 
     void ReceiveBeats()
@@ -164,40 +192,36 @@ public class BeatSpawner : MonoBehaviour
                 {
                     CorrectBeat("Excellent", Color.yellow);
                     PlayerController.instance.ExcellentBeat();
+                    PlayRandomSound(ExcellentSounds);
                 }
                 else if (timeDistance < GreatTimeWindow)
                 {
                     CorrectBeat("Great", Color.green);
                     PlayerController.instance.GreatBeat();
+                    PlayRandomSound(GreatSounds);
                 }
                 else if (timeDistance < GoodTimeWindow)
                 {
                     CorrectBeat("Good", Color.cyan);
                     PlayerController.instance.GoodBeat();
+                    PlayRandomSound(GoodSounds);
                 }
                 else if (timeDistance < OKTimeWindow)
                 {
                     CorrectBeat("OK", Color.red);
                     PlayerController.instance.OKBeat();
+                    PlayRandomSound(OKSounds);
                 }
                 else
                 {
                     MissBeat();
-                }
-                if (LastBeat.GetComponent<BeatController>().channel == 2)
-                {
-                    GetComponent<AudioSource>().clip = Hit2;
-                    GetComponent<AudioSource>().Play();
-                }
-                else
-                {
-                    GetComponent<AudioSource>().clip = Hit;
-                    GetComponent<AudioSource>().Play();
+                    PlayRandomSound(MissSounds);
                 }
             }
             else if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
             {
                 MissBeat();
+                PlayRandomSound(MissSounds);
             }
         }
     }

@@ -73,7 +73,7 @@ public class BeatController : MonoBehaviour
         timeLeft -= Time.deltaTime;
         if (timeLeft < 0)
         {
-            speed = speed * 0.8f;
+            speed = speed * 0.5f;
             if (Mathf.Abs(timeLeft) > BeatSpawner.instance.OKTimeWindow)
             {
                 BeatSpawner.instance.MissBeat();

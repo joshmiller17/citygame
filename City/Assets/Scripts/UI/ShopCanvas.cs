@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class ShopCanvas : MonoBehaviour
 {
     public static ShopCanvas instance;
+    public AudioSource purchaseSound;
     public Shop shop;
     public Texture2D[] itemImages;
 
@@ -18,6 +19,10 @@ public class ShopCanvas : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Hide();
+        }
     }
 
     public static ShopCanvas getInstance()
@@ -68,6 +73,7 @@ public class ShopCanvas : MonoBehaviour
             {
                 PlayerController.instance.money -= shop.inventory[index].cost;
                 shop.Buy(index);
+                purchaseSound.Play();
             }
             else
             {

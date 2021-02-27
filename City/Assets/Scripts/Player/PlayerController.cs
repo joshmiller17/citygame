@@ -21,6 +21,7 @@ public class PlayerController : MonoBehaviour
     public float energyLostPerSecond = 0.1f;
     public float foodLostPerEnergy = 1.5f;
     public float workPerSecond = 5;
+    public float workTimeFastForwardSpeed = 10;
     public float maxTalkingRange = 70;
     public float minimumSpeed = 0.5f;
 
@@ -56,7 +57,7 @@ public class PlayerController : MonoBehaviour
     {
         if (working)
         {
-            if (health <= MaxHP / 2 || GameManager.instance.isNight())
+            if (energy <= 0 || food <= 0 || health <= MaxHP / 2 || GameManager.instance.isNight())
             {
                 stopWorking();
             }
@@ -65,14 +66,14 @@ public class PlayerController : MonoBehaviour
                 float workDone = Time.deltaTime * workPerSecond;
                 spendEnergy(workDone);
                 money += workDone;
-                GameManager.instance.timeOfDay += workDone;
+                GameManager.instance.timeOfDay += Time.deltaTime * workTimeFastForwardSpeed;
             }
         }
     }
 
     public bool isHungry()
     {
-        return food <= 0;
+        return food <= 50;
     }
 
     public bool isTired()
@@ -88,18 +89,21 @@ public class PlayerController : MonoBehaviour
         {
             health += energy;
             energy = 0;
-            controller.m_MoveSpeedMultiplier *= 0.998f;
+            controller.m_MoveSpeedMultiplier *= 0.999f;
         }
         if (isHungry())
         {
-            health += food;
-            food = 0;
-            controller.m_MoveSpeedMultiplier *= 0.998f;
-
             if (!hungry)
             {
                 GameManager.instance.haveThought("I'm hungry. I should eat something.");
                 hungry = true;
+            }
+
+            if (food < 0)
+            {
+                controller.m_MoveSpeedMultiplier *= 0.999f;
+                health += food;
+                food = 0;
             }
         }
         else
@@ -130,8 +134,8 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //slow down if not moving fast
-        if (Input.GetAxis("Vertical") < 0.5)
+        //slow down if not moving fast or music off
+        if (Input.GetAxis("Vertical") < 0.5 || !GameManager.instance.MusicOn)
         {
             controller.m_MoveSpeedMultiplier = Mathf.Max(controller.m_MoveSpeedMultiplier * .999f, 1);
         }
@@ -246,22 +250,22 @@ public class PlayerController : MonoBehaviour
 
     public void ExcellentBeat()
     {
-        controller.m_MoveSpeedMultiplier = Mathf.Max(controller.m_MoveSpeedMultiplier + .1f, Mathf.Min(controller.m_MoveSpeedMultiplier * ExcellentBeatMult, controller.m_MaxMoveSpeedMultiplier));
+        controller.m_MoveSpeedMultiplier = Mathf.Max(controller.m_MoveSpeedMultiplier + .1f, Mathf.Min(controller.m_MoveSpeedMultiplier * ExcellentBeatMult, controller.m_MaxMoveSpeedMultiplier + speedBoost));
     }
 
     public void GreatBeat()
     {
-        controller.m_MoveSpeedMultiplier = Mathf.Max(controller.m_MoveSpeedMultiplier + .01f, Mathf.Min(controller.m_MoveSpeedMultiplier * GoodBeatMult, controller.m_MaxMoveSpeedMultiplier));
+        controller.m_MoveSpeedMultiplier = Mathf.Max(controller.m_MoveSpeedMultiplier + .01f, Mathf.Min(controller.m_MoveSpeedMultiplier * GoodBeatMult, controller.m_MaxMoveSpeedMultiplier + speedBoost));
     }
 
     public void GoodBeat()
     {
-        controller.m_MoveSpeedMultiplier = Mathf.Max(controller.m_MoveSpeedMultiplier + .001f, Mathf.Min(controller.m_MoveSpeedMultiplier * GoodBeatMult, controller.m_MaxMoveSpeedMultiplier));
+        controller.m_MoveSpeedMultiplier = Mathf.Max(controller.m_MoveSpeedMultiplier + .001f, Mathf.Min(controller.m_MoveSpeedMultiplier * GoodBeatMult, controller.m_MaxMoveSpeedMultiplier + speedBoost));
     }
 
     public void OKBeat()
     {
-        controller.m_MoveSpeedMultiplier = Mathf.Max(controller.m_MoveSpeedMultiplier + .0001f, Mathf.Min(controller.m_MoveSpeedMultiplier * OKBeatMult, controller.m_MaxMoveSpeedMultiplier));
+        controller.m_MoveSpeedMultiplier = Mathf.Max(controller.m_MoveSpeedMultiplier + .0001f, Mathf.Min(controller.m_MoveSpeedMultiplier * OKBeatMult, controller.m_MaxMoveSpeedMultiplier + speedBoost));
     }
 
     public void MissBeat()

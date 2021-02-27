@@ -122,21 +122,21 @@ public class CoffeeItem : Item
             case CoffeeType.Coffee:
                 ret.boost = 1;
                 ret.boostDuration = 60;
-                ret.jumpBoost = -0.5f;
+                ret.jumpBoost = -5f;
                 ret.cost = 10;
                 break;
 
             case CoffeeType.LongCoffee:
                 ret.boost = 0.5f;
                 ret.boostDuration = 120;
-                ret.jumpBoost = -0.5f;
+                ret.jumpBoost = -5f;
                 ret.cost = 20;
                 break;
 
             case CoffeeType.JumpCoffee:
                 ret.boost = 0.1f;
-                ret.boostDuration = 30;
-                ret.jumpBoost = 2.0f;
+                ret.boostDuration = 60;
+                ret.jumpBoost = 10f;
                 ret.cost = 15;
                 break;
 

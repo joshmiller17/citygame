@@ -60,6 +60,13 @@ public class Inventory : MonoBehaviour
         }
     }
 
+    void SelectSong(Song s)
+    {
+        BeatSpawner.instance.ClearBeats();
+        GetComponent<AudioSource>().Play();
+        GameManager.instance.MusicSys.SetSong(s);
+    }
+
     void LayoutMusic()
     {
         GameObject row = new GameObject();
@@ -74,7 +81,7 @@ public class Inventory : MonoBehaviour
         foreach (MusicItem m in musicItems)
         {
             GameObject item = Instantiate(InvItemPrefab);
-            item.GetComponent<Button>().onClick.AddListener(delegate { GameManager.instance.MusicSys.SetSong(m.song); });
+            item.GetComponent<Button>().onClick.AddListener(delegate { SelectSong(m.song); });
             item.transform.Find("ItemName").GetComponent<Text>().text = m.song.name;
             item.transform.Find("ItemDesc").GetComponent<Text>().text =
                 string.Format("Difficulty: {0}\nSpeed: {1}", m.song.beatDifficulty, (100 * m.song.speedDifficulty).ToString("F0"));

@@ -4,15 +4,18 @@ using UnityEngine;
 
 public class Shop : Building
 {
-    public enum ShopType { Food, Junk, Energy, Coffee, Music, Travel};
+    public enum ShopType {Any, Food, Junk, Energy, Coffee, Music, Travel};
 
     public Item[] inventory = new Item[3];
-    public float priceModifier;
-    public float valueModifier;
-    public float shopRandomness; // in percentage of potential variance, set once
+    [Range(0.3f, 3f)] public float priceModifier = 1;
+    [Range(0.3f, 3f)] public float valueModifier = 1;
+    [Range(0f, 3f)] public float shopRandomness = 1; // in percentage of potential variance, set once
+    
+    public ShopType shopType;
+
+    [Header("Set by generator")]
     public int daysUntilClose;
     public string storeName = "Test Store";
-    public ShopType shopType;
 
     private float itemRandomness; // in percentage of potential variance, rolled once per item
     private int dateRestocked = 0;
@@ -26,11 +29,10 @@ public class Shop : Building
 
         daysUntilClose = Random.Range(1, 9);
 
-        //test numbers set
-        priceModifier = Random.Range(0.5f, 2.0f);
-        valueModifier = Random.Range(0.5f, 2.0f);
-        shopRandomness = Random.Range(0.1f, 2.0f);
-        shopType = (ShopType)Random.Range(0, 5); // TODO FIXME add more range as I write and test shops
+        if (shopType == ShopType.Any)
+        {
+            shopType = (ShopType)Random.Range(0, 5); // TODO FIXME add more range as I write and test shops
+        }
 
         //actual rolling
         itemRandomness = Random.Range(-1f * shopRandomness, shopRandomness);

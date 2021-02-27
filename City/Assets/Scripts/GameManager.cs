@@ -37,6 +37,7 @@ public class GameManager : MonoBehaviour
     public GameObject moneyText;
     public GameObject interactionInfo;
     public MusicSystem MusicSys;
+    public GameObject ShopCanvas;
 
     [Space(10)]
     [Header("Global Objects")]
@@ -62,7 +63,8 @@ public class GameManager : MonoBehaviour
         aud = MusicSys.GetComponent<AudioSource>();
 
         //TEST
-        Song s = MusicSys.LoadSong("WaterWoodAndStone", 1, .04f);
+        //Song s = MusicSys.LoadSong("Algorithm", 1, .03f);
+        Song s = MusicSys.LoadSong("WaterWoodAndStone", 1, .03f);
         MusicItem m = MusicItem.BaseItem();
         m.song = s;
         Inventory.instance.musicItems.Add(m);
@@ -206,6 +208,11 @@ public class GameManager : MonoBehaviour
         return closest;
     }
 
+
+    public bool IsShopping()
+    {
+        return ShopCanvas.activeInHierarchy;
+    }
 
 
     public void ToggleMusic()
