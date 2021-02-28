@@ -33,6 +33,8 @@ public class ShopCanvas : MonoBehaviour
     public void SetShop(Shop s)
     {
         shop = s;
+        GameObject shopName = transform.Find("ShopName").gameObject;
+        shopName.GetComponent<Text>().text = shop.storeName;
     }
 
     Texture2D FindImage(string name)

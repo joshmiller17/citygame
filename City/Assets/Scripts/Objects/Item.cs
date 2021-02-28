@@ -218,11 +218,8 @@ public class MusicItem : Item
     public static MusicItem BaseItem()
     {
         MusicItem ret = new MusicItem();
-        DirectoryInfo dir = new DirectoryInfo("Assets/Resources/Audio/Music/");
-        FileInfo[] info = dir.GetFiles("*");
-        string randomSong = Path.GetFileNameWithoutExtension(info[Random.Range(0, info.Length)].Name);
-        randomSong = Path.GetFileNameWithoutExtension(randomSong); // cut off both extensions, e.g. .mp3.meta
-        ret.song = MusicSystem.instance.LoadSong(randomSong, 1, .05f);
+        string randomSong = MusicSystem.instance.MusicFiles[Random.Range(0, MusicSystem.instance.MusicFiles.Length)].name;
+        ret.song = MusicSystem.instance.LoadSong(randomSong, 1.5f, .05f);
         ret.cost = 100;
         ret.color = new Color(
          Random.Range(0f, 1f),

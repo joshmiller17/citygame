@@ -1,9 +1,0 @@
-{
-
-
-"Food":["The Food Store", "Meals n' Stuff", "Yummy Yummy"],
-"Junk":["The Junk Store", "Literally Garbage", "McWaffles"],
-"Energy":["The Energy Store", "JUICE JUICE JUICE"],
-"Coffee":["The Coffee Store", "Donkin", "Sterbicks"],
-"Travel":["The Travel Store"]
-}

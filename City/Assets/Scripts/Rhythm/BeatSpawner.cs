@@ -29,16 +29,21 @@ public class BeatSpawner : MonoBehaviour
     public float BeatOffset; // user setting
     public int segmentsPerCircle = 15;
     public float lineWidth = 0.1f;
-
-    [HideInInspector] public bool IsActive = true;
+    public bool IsActive = true;
     [HideInInspector] public Song CurrentSong;
     [HideInInspector] public Rhythm CurrentRhythm;
     [HideInInspector] public List<GameObject> Beats;
+
+    [Space(10)]
+    [Header("Testing")]
+    public float SpeedDifficulty = 0.05f;
 
     private bool Playing = false;
     private int CurrentBeatIndex = 0;
     private float SongTimer = 0;
     private float NextBeat = 0;
+    private float SkipsPerBeat = 0;
+    private int BeatsSinceSkip = 0;
     private int NextChannel;
     private int NextDifficulty;
     private LineRenderer LR;
@@ -50,6 +55,7 @@ public class BeatSpawner : MonoBehaviour
         LR = Helpers.DrawCircle(LR, segmentsPerCircle, TargetDistance, lineWidth);
         LR.material = BeatMaterial;
         LR.material.color = Color.white;
+        Toggle(); // start off
     }
 
     void Update()
@@ -64,10 +70,37 @@ public class BeatSpawner : MonoBehaviour
         LR.transform.Rotate(new Vector3(0, 1, 0));
     }
 
+    void SetFractionalDifficulty()
+    {
+        float fractionalDifficulty = CurrentSong.beatDifficulty - Mathf.Floor(CurrentSong.beatDifficulty);
+        if (fractionalDifficulty < 0.2)
+        {
+            SkipsPerBeat = 1f / 2f;
+        }
+        else if (fractionalDifficulty < 0.4)
+        {
+            SkipsPerBeat = 1f / 3f;
+        }
+        else if (fractionalDifficulty < 0.6)
+        {
+            SkipsPerBeat = 1f / 4f;
+        }
+        else if (fractionalDifficulty < 0.8)
+        {
+            SkipsPerBeat = 1f / 6f;
+        }
+        else
+        {
+            SkipsPerBeat = 0f;
+        }
+    }
+
     public void SetSong(Song s)
     {
         CurrentSong = s;
         CurrentRhythm = s.rhythm;
+        SpeedDifficulty = CurrentSong.speedDifficulty;
+        SetFractionalDifficulty();
     }
 
     public void Play()
@@ -94,15 +127,25 @@ public class BeatSpawner : MonoBehaviour
                 NextBeat = next.Item1;
                 NextChannel = next.Item2;
                 NextDifficulty = next.Item3;
+                bool skip = BeatsSinceSkip * SkipsPerBeat >= 1;
                 if (NextDifficulty <= CurrentSong.beatDifficulty)
                 {
-                    SpawnBeat();
+                    if (skip)
+                    {
+                        BeatsSinceSkip = 0;
+                    }
+                    else
+                    {
+                        SpawnBeat();
+                        BeatsSinceSkip += 1;
+                    }
                 }
             }
             else
             {
-                //CurrentBeatIndex = 0;
+                // TODO we've hit the end of beats
                 //TODO reset the song timer when the song ends, then set CurrentBeatIndex to 0
+                //CurrentBeatIndex = 0;
             }
         }
     }
@@ -121,7 +164,7 @@ public class BeatSpawner : MonoBehaviour
         GameObject NewBeat = Instantiate(new GameObject("Beat"), transform);
         BeatController bc = NewBeat.AddComponent<BeatController>();
         NewBeat.transform.SetParent(gameObject.transform);
-        bc.Initialize(TargetDistance, NextBeat - SongTimer, CurrentSong.speedDifficulty, NextChannel, segmentsPerCircle, lineWidth);
+        bc.Initialize(TargetDistance, NextBeat - SongTimer, SpeedDifficulty, NextChannel, segmentsPerCircle, lineWidth);
         Beats.Add(NewBeat);
     }
 

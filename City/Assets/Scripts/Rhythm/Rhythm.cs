@@ -5,6 +5,9 @@ using UnityEngine;
 
 public class Rhythm
 {
+    private static float MIN_DIFFERENCE = 0.017f; // anything within 17ms of each other, consider the same beat 
+    private static float WAIT_TO_START = 1.5f;  // don't introduce sudden beats in first 1.5 sec, let there be a brief intro
+
     private float[] timings;
     private int[] channels;
     private int[] difficulties;
@@ -16,6 +19,8 @@ public class Rhythm
         List<int> d = new List<int>();
         string fileData = rhythmData.text;
         string[] lines = fileData.Split('\n');
+        float previousTiming = -999f;
+
         foreach (string line in lines)
         {
             string[] data = line.Split();
@@ -23,12 +28,23 @@ public class Rhythm
             {
                 break; //EOF
             }
-            if (float.Parse(data[0]) < 1.5f)
+            if (float.Parse(data[0]) < WAIT_TO_START)
             {
-                continue; // don't introduce sudden beats in first 1.5 sec, let there be a brief intro
+                continue;
             }
-            t.Add(float.Parse(data[0]));
-            c.Add(int.Parse(data[1]));
+
+            float time = float.Parse(data[0]);
+            int chan = int.Parse(data[1]);
+
+            if (time - previousTiming < MIN_DIFFERENCE)
+            {
+                time = previousTiming;
+                chan = 3;
+            }
+
+            previousTiming = time;
+            t.Add(time);
+            c.Add(chan);
             d.Add(int.Parse(data[2]));
         }
         timings = t.ToArray();

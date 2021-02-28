@@ -24,6 +24,7 @@ public class MusicSystem : MonoBehaviour
 
     private void Update()
     {
+        if (!GameManager.instance.MusicOn) return;
         if (preparingReplay)
         {
             timeUntilReplay -= Time.deltaTime;
@@ -53,7 +54,7 @@ public class MusicSystem : MonoBehaviour
         throw new System.ArgumentException("Could not find rhythm and music file: " + name);
     }
 
-    public Song LoadSong(string name, int beatDifficulty, float speedDifficulty)
+    public Song LoadSong(string name, float beatDifficulty, float speedDifficulty)
     {
         int index = FindAssets(name);
         Rhythm r = new Rhythm(Rhythms[index]);
@@ -68,6 +69,8 @@ public class MusicSystem : MonoBehaviour
 
     public void SetSong(Song s)
     {
+        gameObject.GetComponent<AudioSource>().Stop();
+        BeatSpawner.GetComponent<BeatSpawner>().ClearBeats();
         Debug.Log("Song set to " + s.name);
         song = s;
         gameObject.GetComponent<AudioSource>().clip = song.clip;
@@ -76,7 +79,7 @@ public class MusicSystem : MonoBehaviour
 
     public void PlayIfNeeded()
     {
-        if (song != lastSongPlayed)
+        if (song != lastSongPlayed || !gameObject.GetComponent<AudioSource>().isPlaying)
         {
             Play();
             lastSongPlayed = song;

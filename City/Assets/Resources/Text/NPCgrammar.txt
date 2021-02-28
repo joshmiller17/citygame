@@ -1,6 +1,0 @@
-{
-"origin":["#firstname#", "#firstname# #lastname#"],
-"firstname":["#Mike#", "???"],
-"lastname":["#firstname#son", "#firstname#er"],
-"Mike":["Mike", "Myke", "Mikey", "Michael", "Maik", "M."]
-}

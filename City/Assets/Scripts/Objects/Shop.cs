@@ -135,8 +135,9 @@ public class Shop : Building
         m = MusicItem.BaseItem();
         m.value *= valueModifier * itemRand;
         m.cost *= priceModifier * itemRand;
-        m.song.beatDifficulty = Mathf.Max(1, Mathf.Min(3, (int)Mathf.Round(m.value / 3)));
-        m.song.speedDifficulty += Random.Range(-0.03f, 0.06f); // FIXME? Hardcoded range of speed not even based on value, price etc
+        m.song.beatDifficulty = 1 + (m.value / 2f); // value typically has range of 0-6, difficulty wants 1-4
+        m.song.speedDifficulty += Random.Range(-0.05f / Mathf.Max(1, m.value), 0.1f * m.value); // generally lower speed for lower difficulty
+        m.song.speedDifficulty = Mathf.Max(0.001f * m.value, m.song.speedDifficulty); // clamp
         m.cost = Mathf.Round(m.cost * 100f) / 100f; //Round to 2 places
         m.icon = "headphones";
         m.itemName = m.song.name;

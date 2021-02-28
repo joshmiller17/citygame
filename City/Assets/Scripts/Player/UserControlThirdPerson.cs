@@ -51,6 +51,10 @@ public class UserControlThirdPerson : MonoBehaviour {
         if (inventory)
         {
             Inventory.instance.Toggle();
+            if (GameManager.instance.MusicOn)
+            {
+                GameManager.instance.ToggleMusic();
+            }
         }
 
         if (cheat)

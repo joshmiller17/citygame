@@ -8,12 +8,12 @@ public class GameManager : MonoBehaviour
     public static GameManager instance;
 
     [Header("Global Settings")]
-    public string buildID = "Alpha v0.1.0-win"; // hard-coded, could be better, meh
+    public string buildID;
     [Range(0f, 1f)]
     public float PercentLightInDay;
     public float SongFadeTime;
-    [HideInInspector]
-    public bool MusicOn = true;
+    public bool MusicOn = false;
+    public bool DebugMode = false;
 
     [Space(10)]
     [Header("Global Stats")]
@@ -64,7 +64,7 @@ public class GameManager : MonoBehaviour
 
         //TEST
         //Song s = MusicSys.LoadSong("Algorithm", 1, .03f);
-        Song s = MusicSys.LoadSong("WaterWoodAndStone", 1, .03f);
+        Song s = MusicSys.LoadSong("WaterWoodAndStone", 1.6f, .05f);
         MusicItem m = MusicItem.BaseItem();
         m.song = s;
         Inventory.instance.musicItems.Add(m);
@@ -89,7 +89,6 @@ public class GameManager : MonoBehaviour
         m6.song = s6;
         Inventory.instance.musicItems.Add(m6);
         MusicSys.SetSong(s);
-        MusicSys.PlayIfNeeded();
 
         NameGen.Init();
     }

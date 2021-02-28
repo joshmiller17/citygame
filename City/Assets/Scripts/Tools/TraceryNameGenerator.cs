@@ -40,6 +40,7 @@ public class TraceryNameGenerator : MonoBehaviour
         {
             Shop s = shop.GetComponent<Shop>();
             s.storeName = GetShopName(s.shopType);
+            Debug.Log(string.Format("Renamed {0} to {1}", s.name, s.storeName));
         }
     }
 

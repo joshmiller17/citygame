@@ -4,8 +4,5 @@ using UnityEngine;
 
 public class Building : EnvObj
 {
-    // TODO spawning other EnvObjs
-
-
 
 }

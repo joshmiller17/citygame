@@ -7,6 +7,6 @@ public class Song
     public string name;
     public AudioClip clip;
     public Rhythm rhythm;
-    public int beatDifficulty;
+    public float beatDifficulty;
     public float speedDifficulty;
 }

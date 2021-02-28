@@ -51,6 +51,11 @@ public class Familiarity
         return false;
     }
 
+    public void SetFamiliarity(float f)
+    {
+        familiarity = f;
+    }
+    
     public float GetFamiliarity()
     {
         UpdateFamiliarity();

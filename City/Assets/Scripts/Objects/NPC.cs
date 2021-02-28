@@ -68,6 +68,10 @@ public class NPC : EnvObj
 
     public string GetName()
     {
+        if (fam.GetFamiliarity() <= 1)
+        {
+            return "???";
+        }
         return characterName;
     }
 

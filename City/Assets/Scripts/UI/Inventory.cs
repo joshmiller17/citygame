@@ -26,6 +26,14 @@ public class Inventory : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Toggle();
+        }
+    }
+
     public void Toggle()
     {
         if (!gameObject.activeInHierarchy)

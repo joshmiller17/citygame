@@ -7,6 +7,7 @@ public class EnvObj : MonoBehaviour
 {
     public Familiarity fam = new Familiarity();
     public GameObject trigger;
+    public Color hideColor = Color.yellow;
 
     public virtual void Start()
     {
@@ -14,10 +15,18 @@ public class EnvObj : MonoBehaviour
 
         trigger = Instantiate(GameManager.instance.trigger, transform);
         trigger.transform.SetParent(gameObject.transform);
-        trigger.transform.localScale = b.extents * 2f;
+        trigger.transform.localScale = b.extents + new Vector3(100,100,100);
         trigger.transform.position = gameObject.transform.position;
 
-        ToggleHideObj(true);
+        if (GameManager.instance.DebugMode)
+        {
+            fam.SetFamiliarity(99);
+            ToggleHideObj(false);
+        }
+        else
+        {
+            ToggleHideObj(true);
+        }
     }
 
     void ToggleHideObj(bool hide)
@@ -61,7 +70,7 @@ public class EnvObj : MonoBehaviour
             Debug.Log(string.Format("{0} familiarity is now {1}", gameObject.name, fam.GetFamiliarity()));
             if (fam.GetFamiliarity() >= 1)
             {
-                ColorHideObj(Color.yellow); //FIXME?
+                ColorHideObj(hideColor);
             }
             if (fam.GetFamiliarity() >= 2)
             {

@@ -76,7 +76,10 @@ public class BeatController : MonoBehaviour
             speed = speed * 0.5f;
             if (Mathf.Abs(timeLeft) > BeatSpawner.instance.OKTimeWindow)
             {
-                BeatSpawner.instance.MissBeat();
+                if (BeatSpawner.instance.IsActive)
+                {
+                    BeatSpawner.instance.MissBeat();
+                }
                 DeleteBeat();
             }
         }
